@@ -1,0 +1,4 @@
+# Generate a python gitignore
+venv/
+data/
+.DS_Store
