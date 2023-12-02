@@ -16,24 +16,24 @@ strip = PixelStrip(luči, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTN
 strip.begin()
 
 def nastavi(luč, barva):
-	strip.setPixelColor(luč, Color(barva[0], barva[1], barva[2]))
+    strip.setPixelColor(luč, Color(barva[0], barva[1], barva[2]))
 
 def izriši():
-	strip.show()
+    strip.show()
 
 if __name__ == '__main__':
-	print(argv[0] + "hardware test ...")
-	i = 0
-	try:
-		while True:
-			for k in range(luči):
-				if (i % 2 == 0):
-					strip.setPixelColor(k, Color(255, 255, 255))
-				else:
-					strip.setPixelColor(k, Color(0, 0, 0))
-			strip.show()
-			time.sleep(0.1)
-			i += 1
-			
-	except KeyboardInterrupt:
-		pass
+    print(argv[0] + "hardware test ...")
+    i = 0
+    try:
+        while True:
+            for k in range(luči):
+                if (i % 2 == 0):
+                    strip.setPixelColor(k, Color(255, 255, 255))
+                else:
+                    strip.setPixelColor(k, Color(0, 0, 0))
+            strip.show()
+            time.sleep(0.1)
+            i += 1
+            
+    except KeyboardInterrupt:
+        pass
