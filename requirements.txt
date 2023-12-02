@@ -1,0 +1,23 @@
+# Server
+flask
+
+# Simulation
+pygame
+
+# Hardware
+# rpi-ws281x
+
+# Runner
+requests
+numpy
+pandas
+pillow
+
+# Development
+opencv-python
+matplotlib
+
+# Lint
+ruff
+black
+mypy

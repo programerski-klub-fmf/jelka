@@ -1,0 +1,50 @@
+  on:
+    - push
+    - pull_request
+
+  jobs:
+
+    # Empty job so GitHub does not complain
+    # Remove once other jobs are uncommented
+    empty:
+      runs-on: ubuntu-latest
+
+# Disabled until library is added
+#    lint:
+#      name: Linting
+#      runs-on: ubuntu-latest
+#
+#      steps:
+#        - name: Checkout repository
+#          uses: actions/checkout@v3
+#
+#        - name: Configure cache
+#          uses: actions/cache@v3
+#          with:
+#            path: |
+#              ~/.cache/black
+#              ~/.cache/pip
+#              ./.ruff_cache
+#              ./.mypy_cache
+#            key: ${{ runner.os }}-lint-
+#            restore-keys: ${{ runner.os }}-lint-
+#
+#        - name: Install Python
+#          uses: actions/setup-python@v4
+#          with:
+#            python-version: "3.11"
+#
+#        - name: Install dependencies
+#          run: pip install -r requirements.txt
+#
+#        - name: Lint with ruff
+#          run: ruff library
+#
+#        - name: Lint with black
+#          run: black library --check
+#
+#        - name: Typecheck with mypy
+#          run: mypy library
+
+# TODO: Add deployment job
+# Something like: On commit to master, SSH to the server, pull latest changes
