@@ -1,7 +1,7 @@
 from os import getenv
 
 if getenv("JELKA_PRODUKCIJA"):
-    from hardware.hardware import Hardware  # type: ignore
+    from hardware.hardware import Hardware
 else:
     from simulation.simulation import Hardware  # type: ignore
 # Tukej se odločimo kaj bomo uporabili, smreko ali simulacijo.
