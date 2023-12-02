@@ -1,6 +1,7 @@
-import pygame
 import math
 from random import uniform, randint
+from time import time
+from threading import Thread, Lock
 
 class Matrix(list):
     def __mul__(self, other):
@@ -33,16 +34,13 @@ def random_tree(n = 500, origin = (0, 0, 0), height = 200, max_width = 120, min_
             yield (x + origin[0], y + origin[1], origin[2] + h)
     
 
-def draw_lucka(lucka, screen, size, color, scale):
+def draw_lucka(pygame, lucka, screen, size, color, scale):
     w, h = pygame.display.get_surface().get_size()
     pygame.draw.circle(screen, color, (w*lucka[0]*scale + w // 2, (-w*lucka[1]*scale + h // 2)), size)
 
 
 class Simulation:
     def __init__(self, smreka = None) -> None:
-        pygame.init()
-        self.screen = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
-        self.clock = pygame.time.Clock()
         self.running = True
         self.phi, self.tau = 0, 0
 
@@ -55,12 +53,23 @@ class Simulation:
 
         self.scale = 1
         self.camera = (0, -500, 50)
-        pygame.mouse.get_rel()
     
     def set_colors(self, colors):
+        if not self.running:
+            raise InterruptedError("Simulation stopped.")
         self.colors = [tuple(color) for color in colors]
+    
+    def init(self):
+        import pygame
+        self.pygame = pygame
+        pygame.init()
+        self.screen = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
+        self.clock = pygame.time.Clock()
+        pygame.mouse.get_rel()
+
 
     def frame(self):
+        pygame = self.pygame
         self.w, self.h = pygame.display.get_surface().get_size()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -91,19 +100,41 @@ class Simulation:
         r = Matrix.rotation(self.phi, self.tau)
         for p, c in zip(map(lambda x: (r * x).proj(self.camera), self.points), self.colors):
             if p[2] > 0:
-                draw_lucka((p[0], p[1]), self.screen, max(20 / p[2], 1), c, self.scale) 
+                draw_lucka(pygame, (p[0], p[1]), self.screen, max(20 / p[2], 1), c, self.scale) 
         p = (r * Matrix([[0], [0], [0]])).proj(self.camera)
-        draw_lucka((p[0], p[1]), self.screen, max(20 / p[2], 1), (0, 255, 0), self.scale) 
+        draw_lucka(pygame, (p[0], p[1]), self.screen, max(20 / p[2], 1), (0, 255, 0), self.scale) 
         pygame.display.flip()
-        self.clock.tick(60)  # limits FPS to 60
+        # self.clock.tick(60)  # limits FPS to 60
 
     def quit(self):
         self.running = False
-        pygame.quit()
+        self.pygame.quit()
 
+class Hardware:
+    is_simulation = True
+    def __init__(self, file="data/random_tree.csv") -> None:
+        if file is None:
+            self.simulation = Simulation()
+        else:
+            self.simulation = Simulation(smreka=[tuple(map(float,(line.split(",")[1:]))) for line in open(file, "r").read().split("\n") if line != ""])
+        self.thread = Thread(target=self._run)
+        self.thread.start()
+
+    def _run(self):
+        try:
+            self.simulation.init()
+            while self.simulation.running:
+                with Lock():
+                    self.simulation.frame()    
+            self.simulation.quit()
+        finally:
+            self.simulation.quit()
+
+    def set_colors(self, colors: list[tuple[int, int, int]]) -> None:
+        self.simulation.set_colors(colors)
 
 if __name__ == "__main__":
-    sim = Simulation()
-    while sim.running:
-        sim.frame()
-    sim.quit()
+    with open("data/random_tree.csv", "w+") as f:
+        for i, (x, y, z) in enumerate(random_tree()):
+            f.write(f"{i},{x},{y},{z}\n")
+    h = Hardware(file=None)
