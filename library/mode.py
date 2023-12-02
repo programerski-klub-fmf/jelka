@@ -1,4 +1,5 @@
 from os import getenv
+
 if getenv("JELKA_PRODUKCIJA"):
     from hardware.hardware import Hardware
 else:
