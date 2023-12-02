@@ -1,6 +1,6 @@
-from .mode import Hardware
+from library.mode import Hardware
 from collections import defaultdict
-from typing import Any, NewType, Callable, cast
+from typing import NewType, Callable
 import time
 
 Color = NewType("Color", tuple[int, int, int])
@@ -42,14 +42,14 @@ class Jelka:
         if isinstance(colors, list):
             if len(colors) != self.count:
                 raise ValueError(f"Seznam barv mora biti enak številu lučk Jelka.count = {self.count}.")
-            self.hardware.set_colors(cast(list[tuple[int, int, int]], colors))
+            self.hardware.set_colors(colors)
             self.colors = [Color(color) for color in colors]
         elif isinstance(colors, defaultdict):
-            self.colors = [colors[Id(i)] for i in range(self.count)]
-            self.hardware.set_colors(cast(list[tuple[int, int, int]], colors))
+            self.colors = [colors[i] for i in range(self.count)]
+            self.hardware.set_colors(self.colors)
         elif isinstance(colors, dict):
-            self.colors = [colors[Id(i)] if i in colors else Color((0, 0, 0)) for i in range(self.count)]
-            self.hardware.set_colors(cast(list[tuple[int, int, int]], colors))
+            self.colors = [colors[i] if i in colors else (0, 0, 0) for i in range(self.count)]
+            self.hardware.set_colors(self.colors)
         else:
             raise ValueError(f"Unsuported type {type(colors)} for colors.")
     
@@ -60,14 +60,14 @@ class Jelka:
     def run_shader(self, shader: Callable[[Id, Time], Color | None]) -> None:
         started_time = int(time.time() * 1000)
         running = True
-        colors = [shader(Id(i), Time(0)) for i in range(self.count)]
+        colors = [shader(i, time.time()) for i in range(self.count)]
         last_time = int(time.time() * 1000)
         while running:
             if any(color is None for color in colors):
                 running = False
                 break
-            self.set_colors(colors)  # type: ignore[arg-type]
-            colors = [shader(Id(i), Time(int(time.time() * 1000) - started_time)) for i in range(self.count)]
+            self.set_colors(colors)
+            colors = [shader(i, int(time.time() * 1000) - started_time) for i in range(self.count)]
             tmp_last_time = int(time.time() * 1000)
             time.sleep(max(1 / self.refresh_rate - (time.time() - last_time / 1000), 0.01))
             last_time = tmp_last_time
