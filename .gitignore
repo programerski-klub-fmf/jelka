@@ -50,7 +50,8 @@ __pycache__/
 # Temporary
 cache/
 tmp/
-data/
+data/random_tree.csv
+data/points.csv
 .eslintcache
 .ruff_cache
 .mypy_cache
