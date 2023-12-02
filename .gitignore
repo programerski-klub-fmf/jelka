@@ -1,4 +1,60 @@
-# Generate a python gitignore
-venv/
-data/
+# IDE & System
+$RECYCLE.BIN/
+.AppleDouble
 .DS_Store
+.LSOverride
+.Trash-*
+.buildpath
+.c9
+.c9revisions
+.directory
+.fuse_hidden*
+.idea
+.nfs*
+.project
+.settings
+.vs
+.vscode
+*.iml
+[Dd]esktop.ini
+[Tt]humbs.db
+
+# Logs
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Environments
+.env/
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Packaging
+dist/
+build/
+eggs/
+wheels/
+node_modules/
+
+# Compiled
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Temporary
+cache/
+tmp/
+data/
+.eslintcache
+.ruff_cache
+.mypy_cache
+.yarn-integrity
+.ipynb_checkpoints
+.dmypy.json
+dmypy.json
