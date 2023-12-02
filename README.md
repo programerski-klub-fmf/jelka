@@ -8,4 +8,4 @@
 
 ## Running patterns
 * run `py simulation/simulation.py` to create a randomized tree file
-* `py -m patterns.one_color_change`
+* `py -m patterns.one_color_change.py`
