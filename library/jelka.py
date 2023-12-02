@@ -1,4 +1,4 @@
-from mode import Hardware
+from library.mode import Hardware
 from collections import defaultdict
 from typing import Any, NewType, Callable
 import time
