@@ -1,8 +1,8 @@
 from os import getenv
 if getenv("JELKA_PRODUKCIJA"):
-	from hardware.hardware import Hardware
+    from hardware.hardware import Hardware
 else:
-	from simulation.simulation import Hardware
+    from simulation.simulation import Hardware
 # Tukej se odločimo kaj bomo uporabili, smreko ali simulacijo.
 # Pustimo tukaj importan Hardware iz simulation.py, na jelki bo pa to nekej drugega.
 
