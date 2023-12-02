@@ -1,6 +1,6 @@
-from library.mode import Hardware
+from mode import Hardware
 from collections import defaultdict
-from typing import NewType, Callable
+from typing import Any, NewType, Callable
 import time
 
 Color = NewType("Color", tuple[int, int, int])
@@ -8,13 +8,16 @@ Id = NewType("Id", int)
 Position = NewType("Position", tuple[float, float, float])
 Time = NewType("Time", int)
 
+
 def nice_exit(func: Callable) -> Callable:
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: list, **kwargs: dict) -> Any:
         try:
             return func(*args, **kwargs)
         except InterruptedError:
             print("Interrupted.")
+
     return wrapper
+
 
 class Jelka:
     def __init__(self, file: str | None = None) -> None:
@@ -29,15 +32,16 @@ class Jelka:
             else:
                 file = "data/lucke3d.csv"
         self.hardware = Hardware(file=file)
-        
+
         self.positions = {}
-        with open(file, "r") as f:
+        with open(file) as f:
             for line in f.readlines():
                 line = line.strip()
-                if line == "": continue
+                if line == "":
+                    continue
                 i, x, y, z = line.split(",")
                 self.positions[int(i)] = (float(x), float(y), float(z))
-    
+
     def set_colors(self, colors: dict[Id, Color] | list[Color] | defaultdict[Id, Color]) -> None:
         if isinstance(colors, list):
             if len(colors) != self.count:
@@ -52,10 +56,10 @@ class Jelka:
             self.hardware.set_colors(self.colors)
         else:
             raise ValueError(f"Unsuported type {type(colors)} for colors.")
-    
+
     def get_color(self, id: Id) -> Color:
         return self.colors[id]
-    
+
     @nice_exit
     def run_shader(self, shader: Callable[[Id, Time], Color | None]) -> None:
         started_time = int(time.time() * 1000)
@@ -71,4 +75,3 @@ class Jelka:
             tmp_last_time = int(time.time() * 1000)
             time.sleep(max(1 / self.refresh_rate - (time.time() - last_time / 1000), 0.01))
             last_time = tmp_last_time
-        

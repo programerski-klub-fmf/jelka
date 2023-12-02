@@ -1,4 +1,5 @@
 from simulation.simulation import Hardware
+
 # Tukej se odločimo kaj bomo uporabili, smreko ali simulacijo.
 # Pustimo tukaj importan Hardware iz simulation.py, na jelki bo pa to nekej drugega.
 
