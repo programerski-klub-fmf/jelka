@@ -64,26 +64,14 @@ class Jelka:
     def run_shader(self, shader: Callable[[Id, Time], Color | None]) -> None:
         started_time = int(time.time() * 1000)
         running = True
-<<<<<<< HEAD
         colors = [shader(i, 0) for i in range(self.count)]
         last_time = time.time()
-=======
-        colors = [shader(Id(i), Time(0)) for i in range(self.count)]
-        last_time = int(time.time() * 1000)
->>>>>>> ec51b5f0e02c4baf0061948a4818a6075ec86d4c
         while running:
             if any(color is None for color in colors):
                 running = False
                 break
-<<<<<<< HEAD
             self.set_colors(colors)
             tmp_last_time = time.time()
             colors = [shader(i, int(time.time() * 1000) - started_time) for i in range(self.count)]
             time.sleep(max(1 / self.refresh_rate - (time.time() - last_time), 0.01))
-=======
-            self.set_colors(colors)  # type: ignore[arg-type]
-            colors = [shader(Id(i), Time(int(time.time() * 1000) - started_time)) for i in range(self.count)]
-            tmp_last_time = int(time.time() * 1000)
-            time.sleep(max(1 / self.refresh_rate - (time.time() - last_time / 1000), 0.01))
->>>>>>> ec51b5f0e02c4baf0061948a4818a6075ec86d4c
             last_time = tmp_last_time
