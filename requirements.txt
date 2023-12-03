@@ -10,6 +10,7 @@ pygame
 # Runner
 requests
 numpy
+scipy
 pandas
 pillow
 
@@ -21,3 +22,4 @@ matplotlib
 ruff
 black
 mypy
+pre-commit
