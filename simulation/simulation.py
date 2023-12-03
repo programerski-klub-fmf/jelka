@@ -5,7 +5,12 @@ from threading import Thread, Lock
 
 class Matrix(list):
     def __mul__(self, other):
-        return Matrix([[sum([self[i][m]*other[m][j] for m in range(len(self[0]))]) for j in range(len(other[0]))] for i in range(len(self))])
+        return Matrix(
+            [
+                [sum([self[i][m] * other[m][j] for m in range(len(self[0]))]) for j in range(len(other[0]))]
+                for i in range(len(self))
+            ]
+        )
 
     def proj(self, cam):
         dy = self[1][0] - cam[1]

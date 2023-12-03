@@ -9,8 +9,7 @@ def distance(point, lines):
         np.array(
             [
                 np.linalg.norm(
-                    np.cross(point - line[0], line[0] - line[1])
-                    / np.linalg.norm(line[0] - line[1])
+                    np.cross(point - line[0], line[0] - line[1]) / np.linalg.norm(line[0] - line[1])
                 )
                 ** 2
                 for line in lines
@@ -24,12 +23,15 @@ def jac(point, lines):
 
     return 2 * np.sum(
         np.array(
-            [[
-                (point - line[0])
-                - (line[0] - line[1]) * np.dot(point - line[0], line[0] - line[1])
-                / np.linalg.norm(line[0] - line[1]) ** 2
-                for line in lines
-            ]]
+            [
+                [
+                    (point - line[0])
+                    - (line[0] - line[1])
+                    * np.dot(point - line[0], line[0] - line[1])
+                    / np.linalg.norm(line[0] - line[1]) ** 2
+                    for line in lines
+                ]
+            ]
         ),
         axis=1,
     )
@@ -41,8 +43,8 @@ class Smreka:
         self.camera = np.array([[-x], [-y], [-z]])
 
         # končni rezultati (lucka -> OptimizeResult), OptimizeResult.x = [x, y, z], OptimizeResult.success = True/False
-        self.lucke = {}  
-        
+        self.lucke = {}
+
         self.inverse_rotation = np.identity(3)
         self.angle = 0
         self.height = height
@@ -77,7 +79,7 @@ class Smreka:
         # bounds = ((-self.width, -self.width, 0), (self.width, self.width, self.height))
         for lucka in self.lines:
             lines = [(line[0].flatten(), line[1].flatten()) for line in self.lines[lucka]]
-            #print(lucka, lines)
+            # print(lucka, lines)
             yield lucka, scipy.optimize.least_squares(
                 distance,
                 np.array([0, 0, 0]),
@@ -86,4 +88,3 @@ class Smreka:
 
     def calculate_lucke(self):
         self.lucke = dict(self.calculate())
-

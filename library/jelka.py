@@ -3,10 +3,10 @@ from collections import defaultdict
 from typing import Any, NewType, Callable, cast
 import time
 
-Color = NewType("Color", tuple[int, int, int])
-Id = NewType("Id", int)
-Position = NewType("Position", tuple[float, float, float])
-Time = NewType("Time", int)
+Color = tuple[int, int, int]
+Id = int
+Position = tuple[float, float, float]
+Time = int
 
 
 def nice_exit(func: Callable) -> Callable:
@@ -25,7 +25,7 @@ class Jelka:
         self.count = 500
         self.refresh_rate = 20  # / s
 
-        self.colors = [Color((0, 0, 0)) for _ in range(self.count)]
+        self.colors: list[Color] = [(0, 0, 0) for _ in range(self.count)]
         if file is None:
             if hasattr(Hardware, "is_simulation") and Hardware.is_simulation:
                 file = "data/random_tree.csv"
@@ -46,14 +46,14 @@ class Jelka:
         if isinstance(colors, list):
             if len(colors) != self.count:
                 raise ValueError(f"Seznam barv mora biti enak številu lučk Jelka.count = {self.count}.")
-            self.hardware.set_colors(cast(list[tuple[int, int, int]], colors))
-            self.colors = [Color(color) for color in colors]
+            self.colors = [cast(Color, color) for color in colors]
+            self.hardware.set_colors(self.colors)
         elif isinstance(colors, defaultdict):
-            self.colors = [colors[Id(i)] for i in range(self.count)]
-            self.hardware.set_colors(cast(list[tuple[int, int, int]], colors))
+            self.colors = [colors[i] for i in range(self.count)]
+            self.hardware.set_colors(self.colors)
         elif isinstance(colors, dict):
-            self.colors = [colors[Id(i)] if i in colors else Color((0, 0, 0)) for i in range(self.count)]
-            self.hardware.set_colors(cast(list[tuple[int, int, int]], colors))
+            self.colors = [colors[i] if i in colors else (0, 0, 0) for i in range(self.count)]
+            self.hardware.set_colors(self.colors)
         else:
             raise ValueError(f"Unsuported type {type(colors)} for colors.")
 
@@ -70,7 +70,7 @@ class Jelka:
             if any(color is None for color in colors):
                 running = False
                 break
-            self.set_colors(colors)
+            self.set_colors(cast(list[Color], colors))
             tmp_last_time = time.time()
             colors = [shader(i, int(time.time() * 1000) - started_time) for i in range(self.count)]
             time.sleep(max(1 / self.refresh_rate - (time.time() - last_time), 0.01))

@@ -3,14 +3,14 @@ import math
 
 print("Reading data...")
 data = []
-with open("data/points.csv", "r") as f:
+with open("data/points.csv") as f:
     for line in f.readlines():
         lucka, x, z, pogled = map(int, line.split(","))
         data.append((lucka, x, z, pogled))
 
 # x = 0 je na levem robu slike
 center_x = 930
-# koordinatni sistem je obrnjen, 
+# koordinatni sistem je obrnjen,
 lowest_z = max(data, key=lambda x: x[2])[2]
 height_on_image = abs(min(data, key=lambda x: x[2])[2] - lowest_z)
 width, height = 200, 200
@@ -27,7 +27,9 @@ print("Calculating lucke...")
 smreka.calculate_lucke()
 for lucka in smreka.lucke:
     if not smreka.lucke[lucka].success:
-        print(f"{lucka=}: result={smreka.lucke[lucka].x} cost={smreka.lucke[lucka].cost} success={smreka.lucke[lucka].success}")
+        print(
+            f"{lucka=}: result={smreka.lucke[lucka].x} cost={smreka.lucke[lucka].cost} success={smreka.lucke[lucka].success}"
+        )
 
 print("Writing data...")
 with open("data/lucke3d.csv", "w") as f:
