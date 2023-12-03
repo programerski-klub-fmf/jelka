@@ -60,6 +60,7 @@ try:
     process = subprocess.Popen(
         args, preexec_fn=demote(pw_record.pw_uid, pw_record.pw_gid, os.path.abspath("chroot")), cwd=cwd, env=env, pass_fds=[w]
     )
+    os.close(w)
     prenehaj = threading.Event()
 
     def upravljaj_risanje():
@@ -85,4 +86,3 @@ except:
     pass
 print("cleaning up!")
 process.kill()
-os._exit(0)
