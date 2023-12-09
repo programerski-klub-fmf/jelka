@@ -23,7 +23,7 @@ def nice_exit(func: Callable) -> Callable:
 class Jelka:
     def __init__(self, file: str | None = None) -> None:
         # TODO : lastnosti smreke: višina, širina, število lučk, refresh rate, čas simulacije?
-        self.count = 500
+        self.count = 300
         self.refresh_rate = 20  # / s
 
         self.colors: list[Color] = [(0, 0, 0) for _ in range(self.count)]
@@ -64,6 +64,9 @@ class Jelka:
 
     def get_color(self, id: Id) -> Color:
         return self.colors[id]
+
+    def get_pos(self, id: Id) -> Position:
+        return self.positions[id]
 
     @nice_exit
     def run_shader(self, shader: Callable[[Id, Time], Color | None]) -> None:
