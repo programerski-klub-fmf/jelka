@@ -42,6 +42,26 @@ class Jelka:
                     continue
                 i, x, y, z = line.split(",")
                 self.positions[int(i)] = (float(x), float(y), float(z))
+        
+        # calculate positions normalized to [0,1] 
+        self.normalPositions = {}
+        self.min = [1e9,1e9,1e9]
+        self.max = [-1e9,-1e9,-1e9] 
+            
+        self.min[0] = min(x for x, _, _ in self.positions.values())
+        self.max[0] = max(x for x, _, _ in self.positions.values())
+        self.max[0] -= self.min[0]
+        
+        self.min[1] = min(y for _, y, _  in self.positions.values())
+        self.max[1] = max(y for _, y, _  in self.positions.values())
+        self.max[1] -= self.min[1]
+
+        self.min[2] = min(z for _, _, z in self.positions.values())
+        self.max[2] = max(z for _, _, z in self.positions.values())
+        self.max[2] -= self.min[2]
+
+        for k,v in self.positions.items():
+            self.normalPositions[k] = ((v[0] - self.min[0]) / self.max[0],(v[1] - self.min[1]) / self.max[1],(v[2] - self.min[2]) /self.max[2] )
 
         self.screen_mapping: dict[tuple[int, int], list[int]] = dict()
         self.screen_size: tuple[int, int] = (160, 160)
@@ -65,8 +85,11 @@ class Jelka:
     def get_color(self, id: Id) -> Color:
         return self.colors[id]
 
-    def get_pos(self, id: Id) -> Position:
+    def get_real_pos(self,id : Id) -> Position:
         return self.positions[id]
+
+    def get_pos(self, id: Id) -> Position:
+        return self.normalPositions[id]
 
     @nice_exit
     def run_shader(self, shader: Callable[[Id, Time], Color | None]) -> None:
