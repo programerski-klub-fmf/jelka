@@ -23,7 +23,7 @@ def nice_exit(func: Callable) -> Callable:
 class Jelka:
     def __init__(self, file: str | None = None) -> None:
         # TODO : lastnosti smreke: višina, širina, število lučk, refresh rate, čas simulacije?
-        self.count = 500
+        self.count = 300
         self.refresh_rate = 20  # / s
 
         self.colors: list[Color] = [(0, 0, 0) for _ in range(self.count)]
@@ -42,6 +42,26 @@ class Jelka:
                     continue
                 i, x, y, z = line.split(",")
                 self.positions[int(i)] = (float(x), float(y), float(z))
+        
+        # calculate positions normalized to [0,1] 
+        self.normalPositions = {}
+        self.min = [1e9,1e9,1e9]
+        self.max = [-1e9,-1e9,-1e9] 
+            
+        self.min[0] = min(x for x, _, _ in self.positions.values())
+        self.max[0] = max(x for x, _, _ in self.positions.values())
+        self.max[0] -= self.min[0]
+        
+        self.min[1] = min(y for _, y, _  in self.positions.values())
+        self.max[1] = max(y for _, y, _  in self.positions.values())
+        self.max[1] -= self.min[1]
+
+        self.min[2] = min(z for _, _, z in self.positions.values())
+        self.max[2] = max(z for _, _, z in self.positions.values())
+        self.max[2] -= self.min[2]
+
+        for k,v in self.positions.items():
+            self.normalPositions[k] = ((v[0] - self.min[0]) / self.max[0],(v[1] - self.min[1]) / self.max[1],(v[2] - self.min[2]) /self.max[2] )
 
         self.screen_mapping: dict[tuple[int, int], list[int]] = dict()
         self.screen_size: tuple[int, int] = (160, 160)
@@ -65,8 +85,11 @@ class Jelka:
     def get_color(self, id: Id) -> Color:
         return self.colors[id]
 
-    def get_position(self, id: Id) -> Position:
+    def get_real_pos(self,id : Id) -> Position:
         return self.positions[id]
+
+    def get_pos(self, id: Id) -> Position:
+        return self.normalPositions[id]
 
     @nice_exit
     def run_shader(self, shader: Callable[[Id, Time], Color | None]) -> None:
@@ -86,6 +109,25 @@ class Jelka:
             colors = [shader(i, int(time.time() * 1000) - started_time) for i in range(self.count)]
             time.sleep(max(1 / self.refresh_rate - (time.time() - last_time), 0.01))
             last_time = tmp_last_time
+
+    @nice_exit
+    def run_shader_all(self, shader: Callable[[list(Color),Time,Time], dict[Id, Color] | list[Color] | defaultdict[Id, Color] | None]) -> None:
+        """enako kot run_shader, edino da poda "frame" info in pa da zahteva da nastavi vse lucke
+        """
+        started_time = int(time.time() * 1000)
+        frame = 0
+        running = True
+        colors = [(0,0,0) for i in range(self.count)]
+        last_time = time.time()
+        while running:
+            if any(color is None for color in colors):
+                running = False
+                break  
+            self.set_colors(shader(self.colors,int(time.time() * 1000) - started_time,frame))
+            tmp_last_time = time.time()
+            time.sleep(max(1 / self.refresh_rate - (time.time() - last_time), 0.01))
+            last_time = tmp_last_time
+            frame += 1
 
     def new_screen_mapping(
         self,
