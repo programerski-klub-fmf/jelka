@@ -34,7 +34,7 @@ class Jelka:
                 file = "data/lucke3d.csv"
         self.hardware = Hardware(file=file)
 
-        self.positions = {}
+        self.positions: dict[Id, Position] = {}
         with open(file) as f:
             for line in f.readlines():
                 line = line.strip()
@@ -64,6 +64,9 @@ class Jelka:
 
     def get_color(self, id: Id) -> Color:
         return self.colors[id]
+
+    def get_position(self, id: Id) -> Position:
+        return self.positions[id]
 
     @nice_exit
     def run_shader(self, shader: Callable[[Id, Time], Color | None]) -> None:

@@ -1,6 +1,6 @@
 from library.jelka import Jelka, Color, Id, Position, Time
 
-jelka = Jelka(file="data/lucke3d.csv")
+jelka = Jelka(file="data/random_tree.csv")
 
 
 @jelka.run_shader
