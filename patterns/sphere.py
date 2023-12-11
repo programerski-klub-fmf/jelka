@@ -2,7 +2,7 @@ from library.jelka import Jelka, Color, Id, Position, Time
 import math
 import random as r
 
-jelka = Jelka(file="data/random_tree.csv")
+jelka = Jelka(file="data/lucke3d.csv")
 
 def clamp(c : Color):
     return (min(255,max(c[0],0)), min(255,max(c[1],0)),min(255,max(c[1],0)))
@@ -34,7 +34,10 @@ def normalize(positions):
     mx[1] -= mn[1]
     mx[2] -= mn[2]
     for i in range(0,len(positions)):
-        positions[i] = [(positions[i][0] - mn[0])/mx[0] , (positions[i][1] -mn[1])/mx[1], (positions[i][2] - mn[2])/mx[2]]
+        try:
+            positions[i] = [(positions[i][0] - mn[0])/mx[0] , (positions[i][1] -mn[1])/mx[1], (positions[i][2] - mn[2])/mx[2]]
+        except ZeroDivisionError:
+             positions[i] = [0, 0, 0]
     return positions
 
 

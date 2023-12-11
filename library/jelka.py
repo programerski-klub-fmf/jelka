@@ -34,7 +34,7 @@ class Jelka:
                 file = "data/lucke3d.csv"
         self.hardware = Hardware(file=file)
 
-        self.positions = {}
+        self.positions: dict[Id, Position] = {}
         with open(file) as f:
             for line in f.readlines():
                 line = line.strip()
@@ -43,7 +43,7 @@ class Jelka:
                 i, x, y, z = line.split(",")
                 self.positions[int(i)] = (float(x), float(y), float(z))
 
-        # calculate positions normalized to [0,1]
+        # calculate positions normalized to [0,1]  # TODO popravi
         self.normalPositions = {}
         self.min = [1e9, 1e9, 1e9]
         self.max = [-1e9, -1e9, -1e9]
@@ -90,10 +90,10 @@ class Jelka:
         return self.colors[id]
 
     def get_real_pos(self, id: Id) -> Position:
-        return self.positions[id]
+        return self.positions.get(id, (0, 0, 0))
 
     def get_pos(self, id: Id) -> Position:
-        return self.normalPositions[id]
+        return self.normalPositions.get(id, (0, 0, 0))
 
     @nice_exit
     def run_shader(self, shader: Callable[[Id, Time], Color | None]) -> None:
@@ -114,12 +114,10 @@ class Jelka:
             time.sleep(max(1 / self.refresh_rate - (time.time() - last_time), 0.01))
             last_time = tmp_last_time
 
-    @nice_exit
+    @nice_exit  # TODO pobriši in naredi lepo in malo bolj bug resistant
     def run_shader_all(
         self,
-        shader: Callable[
-            [list(Color), Time, Time], dict[Id, Color] | list[Color] | defaultdict[Id, Color] | None
-        ],
+        shader: Callable[[list[Color], Time, Time], dict[Id, Color] | list[Color] | defaultdict[Id, Color] | None],
     ) -> None:
         """enako kot run_shader, edino da poda "frame" info in pa da zahteva da nastavi vse lucke"""
         started_time = int(time.time() * 1000)
@@ -131,7 +129,8 @@ class Jelka:
             if any(color is None for color in colors):
                 running = False
                 break
-            self.set_colors(shader(self.colors, int(time.time() * 1000) - started_time, frame))
+            colors = shader(self.colors, int(time.time() * 1000) - started_time, frame)
+            self.set_colors(cast(list[Color], colors))
             tmp_last_time = time.time()
             time.sleep(max(1 / self.refresh_rate - (time.time() - last_time), 0.01))
             last_time = tmp_last_time
