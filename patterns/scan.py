@@ -9,13 +9,13 @@ jelka = Jelka(file="data/lucke3d.csv")
 
 @jelka.run_shader_all
 def update_colors(colors: list(Color), time: int, frame: int):
-    zup = math.sin(frame / 80)/2 + 0.5
+    zup = math.sin(frame / 80)/1.8 + 0.55
     threshold = 0.1
-    
+
     global col
     global change
     if frame == 0: change = 0
-    if (frame == 0 or zup < 0.01 or zup > 0.99) and change == 0:
+    if (frame == 0 or zup < 0 or zup > 1.1) and change == 0:
         change = 1
         col = vivid(random_color())
     elif zup > 0.01 and zup < 0.99: change = 0
