@@ -9,29 +9,35 @@ import time
 import resource
 import shutil
 import threading
-from jelka_config import luči
+import jelka_config
+import select
+luči = jelka_config.luči
+if os.getenv("LEDS"):
+	luči = int(os.getenv("LEDS"))
 from sys import argv
 if not os.getenv("DRY_RUN"):
-    import jelka_hardware
+	import jelka_hardware
 
 def izriši():
-    if os.getenv("DRY_RUN"):
-        print("wrapper: ", end="")
-        for i in range(luči*3):
-            print(f"{buffer[i]:02x}", end="")
-        print()
-        return
-    for i in range(luči):
-        jelka_hardware.nastavi(i, (buffer[3*i], buffer[3*i+1], buffer[3*i+2]))
-    jelka_hardware.izriši()
+	if os.getenv("SPANJE"):
+		time.sleep(float(os.getenv("SPANJE")))
+	if os.getenv("DRY_RUN"):
+		print("wrapper: ", end="")
+		for i in range(luči*3):
+			print(f"{buffer[i]:02x}", end="")
+		print()
+		return
+	for i in range(luči):
+		jelka_hardware.nastavi(i, (buffer[3*i], buffer[3*i+1], buffer[3*i+2]))
+	jelka_hardware.izriši()
 
 def demote(uid, gid, chrootpath):
-    def result():
-        resource.setrlimit(resource.RLIMIT_NPROC, (1, 1))
-        os.chroot(chrootpath)
-        os.setgid(gid)
-        os.setuid(uid)
-    return result
+	def result():
+		resource.setrlimit(resource.RLIMIT_NPROC, (1, 1))
+		os.chroot(chrootpath)
+		os.setgid(gid)
+		os.setuid(uid)
+	return result
 
 shmf = open("chroot/dev/shm/jelka", mode="w+b")
 os.ftruncate(shmf.fileno(), luči*3)
@@ -40,13 +46,13 @@ cwd = "chroot/jelka"
 r, w = os.pipe()
 filename = "/jelka/patterns/" + argv[1]
 if os.access(filename, os.X_OK):
-    args = [filename, str(w)]
+	args = [filename, str(w)]
 else:
-    args = [shutil.which("python3"), filename, str(w)]
+	args = [shutil.which("python3"), filename, str(w)]
 if os.getenv("JELKA_USER"):
-    pw_record = pwd.getpwnam(os.getenv("JELKA_USER"))
+	pw_record = pwd.getpwnam(os.getenv("JELKA_USER"))
 else:
-    pw_record = pwd.getpwnam("umetnik")
+	pw_record = pwd.getpwnam("umetnik")
 os.chown("chroot/dev/shm/jelka", 0, pw_record.pw_gid)
 os.chmod("chroot/dev/shm/jelka", 0o660)
 env = os.environ.copy()
@@ -56,33 +62,45 @@ env["PWD"] = cwd
 env["USER"] = pw_record.pw_name
 env["PYTHONPATH"] = "/jelka"
 env["JELKA_PRODUKCIJA"] = "da"
+del env["KODA"]
+die = False
 try:
-    process = subprocess.Popen(
-        args, preexec_fn=demote(pw_record.pw_uid, pw_record.pw_gid, os.path.abspath("chroot")), cwd=cwd, env=env, pass_fds=[w]
-    )
-    os.close(w)
-    prenehaj = threading.Event()
+	process = subprocess.Popen(
+		args, preexec_fn=demote(pw_record.pw_uid, pw_record.pw_gid, os.path.abspath("chroot")), cwd=cwd, env=env, pass_fds=[w]
+	)
+	os.close(w)
+	prenehaj = threading.Event()
 
-    def upravljaj_risanje():
-        try:
-            while io.FileIO(r, closefd=False).read(1):
-                izriši()
-            result = process.wait()
-            buffer.close()
-            shmf.close()
-        except:
-            prenehaj.set()
+	def upravljaj_risanje():
+		global die
+		pollobj = select.poll()
+		pollobj.register(r, select.POLLIN)
+		try:
+			while pollobj.poll():
+				if die:
+					return
+				izriši()
+				io.FileIO(r, closefd=False).read(1)
+			result = process.wait()
+			buffer.close()
+			shmf.close()
+		except:
+			prenehaj.set()
 
-    threading.Thread(target=upravljaj_risanje).start()
+	threading.Thread(target=upravljaj_risanje).start()
 
-    def zaznaj_smrt():
-        process.wait()
-        prenehaj.set()
+	def zaznaj_smrt():
+		process.wait()
+		prenehaj.set()
 
-    threading.Thread(target=zaznaj_smrt).start()
+	threading.Thread(target=zaznaj_smrt).start()
 
-    prenehaj.wait()
+	prenehaj.wait()
 except:
-    pass
-print("cleaning up!")
+	pass
+print("wrapper: cleaning up!")
+die = True
 process.kill()
+io.FileIO(r, closefd=False).readall()
+os.close(r)
+print("wrapper: cleaned up")

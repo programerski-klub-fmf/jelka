@@ -1,13 +1,21 @@
 <meta name=viewport content='width=device-width, initial-scale=1.0'>
 <title>jelka na fmf</title>
 <h1>jelka na fmf</h1>
-<label for=geslo>geslo: </label><input id=geslo type=text placeholder=geslo /> (geslo najdete na LED zaslonu)
+<label for=geslo>geslo: </label><input onchange=geslochange() id=geslo type=text placeholder=geslo /> (geslo najdete na LED zaslonu)
 <br>
 <label for=čas>čas vzorca v sekundah: </label><input id=čas type=number placeholder=10 min=1 max=300 /> <button onclick=nastavi_čas()>nastavi!</button>
 <br>
 <!-- enkrat poženi poljuben vzorec: <input type=file id=file /> <button id=poženi>poženi</button> -->
 <ul id=vzorci></ul>
 <script>
+	document.addEventListener("DOMContentLoaded", (event) => {
+		console.log("alo")
+		console.log(geslo);
+		geslo.value = localStorage.getItem("geslo");
+	});
+	function geslochange () {
+		localStorage.setItem("geslo", geslo.value);
+	}
 	function nastavi_čas() {
 		if (geslo.value == "") {
 			alert("nastavite geslo!");
@@ -27,62 +35,73 @@
 		});
 	}
 	geslo.value = location.hash.substr(1);
-	const evt = new EventSource("stream/");
-	evt.onmessage = (e) => {
-		data = JSON.parse(e.data);
-		console.log(data);
-		vzorci.innerHTML = "";
-		for (let i = 0; i < data.vzorci.length; i++) {
-			const li = document.createElement("li");
-			const začni = document.createElement("button");
-			const a = document.createElement("a");
-			if (data["trenuten"] == data.vzorci[i])
-				li.innerText = "trenuten: ";
-			začni.innerText = "začni";
-			a.innerText = data.vzorci[i];
-			a.href = "vzorci/" + data.vzorci[i];
-			li.appendChild(a);
-			začni.onclick = () => {
-				if (geslo.value == "") {
-					alert("nastavite geslo!");
-					return;
+	function setupeventsource () {
+		const evt = new EventSource("stream/");
+		evt.onerror = (e) => {
+			evt.close();
+			setTimeout(setupeventsource, 1000);
+		};
+		evt.onmessage = (e) => {
+			data = JSON.parse(e.data);
+			console.log(data);
+			čas.value = data.čas;
+			vzorci.innerHTML = "";
+			for (let i = 0; i < data.vzorci.length; i++) {
+				const li = document.createElement("li");
+				const začni = document.createElement("button");
+				const a = document.createElement("a");
+				začni.innerText = "začni";
+				a.innerText = data.vzorci[i];
+				a.href = "vzorci/" + data.vzorci[i];
+				li.appendChild(a);
+				začni.onclick = () => {
+					if (geslo.value == "") {
+						alert("nastavite geslo!");
+						return;
+					}
+					fetch(geslo.value, {
+						method: "POST",
+						body: JSON.stringify({
+							"začni": data.vzorci[i]
+						}),
+					}).then(data => {
+						data.json().then(json => {
+							if (Object.keys(json).includes("napaka")) {
+								alert(json.napaka.besedilo)
+							}
+						})
+					});
+				};
+				li.appendChild(začni);
+				const stanje = document.createElement("button");
+				stanje.innerText = "onemogoči";
+				if (data.onemogočeni.includes(data.vzorci[i]))
+					stanje.innerText = "omogoči";
+				stanje.onclick = () => {
+					if (geslo.value == "") {
+						alert("nastavite geslo!");
+						return;
+					}
+					fetch(geslo.value, {
+						method: "POST",
+						body: "{\"" + stanje.innerText + "\": [\"" + data.vzorci[i] + "\"]}",
+					}).then(data => {
+						data.json().then(json => {
+							if (Object.keys(json).includes("napaka")) {
+								alert(json.napaka.besedilo)
+							}
+						})
+					});
+				};
+				li.appendChild(stanje);
+				if (data["trenuten"] == data.vzorci[i]) {
+					const spa = document.createElement("span");
+					spa.innerText = " (trenuten)";
+					li.appendChild(spa);
 				}
-				fetch(geslo.value, {
-					method: "POST",
-					body: JSON.stringify({
-						"začni": data.vzorci[i]
-					}),
-				}).then(data => {
-					data.json().then(json => {
-						if (Object.keys(json).includes("napaka")) {
-							alert(a.napaka.besedilo)
-						}
-					})
-				});
-			};
-			li.appendChild(začni);
-			const stanje = document.createElement("button");
-			stanje.innerText = "onemogoči";
-			if (data.onemogočeni.includes(data.vzorci[i]))
-				stanje.innerText = "omogoči";
-			stanje.onclick = () => {
-				if (geslo.value == "") {
-					alert("nastavite geslo!");
-					return;
-				}
-				fetch(geslo.value, {
-					method: "POST",
-					body: "{\"" + stanje.innerText + "\": [\"" + data.vzorci[i] + "\"]}",
-				}).then(data => {
-					data.json().then(json => {
-						if (Object.keys(json).includes("napaka")) {
-							alert(a.napaka.besedilo)
-						}
-					})
-				});
-			};
-			li.appendChild(stanje);
-			vzorci.appendChild(li);
+				vzorci.appendChild(li);
+			}
 		}
 	}
+	setupeventsource();
 </script>
