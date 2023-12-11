@@ -26,7 +26,7 @@ class Matrix(list):
         return yz * xy
 
 
-def random_tree(n=500, origin=(0, 0, 0), height=200, max_width=120, min_width=60):
+def random_tree(n=300, origin=(0, 0, 0), height=200, max_width=120, min_width=60):
     count = 0
     while count < n:
         x = uniform(-max_width, max_width)
@@ -57,7 +57,7 @@ class Simulation:
         self.colors = [(randint(0, 255), randint(0, 255), randint(0, 255)) for _ in self.smreka]
 
         self.scale = 1
-        self.camera = (0, -500, 50)
+        self.camera = (0, -500, 100)
 
     def set_colors(self, colors):
         if not self.running:

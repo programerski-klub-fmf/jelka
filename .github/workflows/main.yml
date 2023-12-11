@@ -31,12 +31,15 @@
           run: pip install -r requirements.txt
 
         - name: Lint with ruff
+          if: always()
           run: ruff library
 
         - name: Lint with black
+          if: always()
           run: black library --check
 
         - name: Typecheck with mypy
+          if: always()
           run: mypy library
 
 # TODO: Add deployment job
