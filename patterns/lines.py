@@ -4,7 +4,7 @@ from typing import Any, Callable, cast
 
 jelka = Jelka(file="data/random_tree.csv")
 
- 
+
 @jelka.run_shader_all
 def update_colors(colors : list(Color),time: int, frame: int):
     if frame == 0:
