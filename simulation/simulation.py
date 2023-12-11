@@ -26,7 +26,7 @@ class Matrix(list):
         return yz * xy
 
 
-def random_tree(n=500, origin=(0, 0, 0), height=200, max_width=120, min_width=60):
+def random_tree(n=300, origin=(0, 0, 0), height=200, max_width=120, min_width=60):
     count = 0
     while count < n:
         x = uniform(-max_width, max_width)

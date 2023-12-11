@@ -34,7 +34,7 @@ def vzorec(vzorec):
 
 @http.route("/", methods=["GET"])
 def index():
-    return flask.render_template("index.html");
+    return flask.render_template("index.html")
 
 @http.route("/stream/", methods=["GET"])
 def stream():
@@ -93,7 +93,7 @@ def subprocess_manager():
         razlog = začni_vzorec.wait(timeout=čas_vzorca)
         proces.send_signal(subprocess.signal.SIGINT)
         proces.wait()
-    
+
 začni_vzorec = threading.Event()
 sprememba_stanja = threading.Event()
 

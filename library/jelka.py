@@ -42,16 +42,16 @@ class Jelka:
                     continue
                 i, x, y, z = line.split(",")
                 self.positions[int(i)] = (float(x), float(y), float(z))
-        
-        # calculate positions normalized to [0,1] 
+
+        # calculate positions normalized to [0,1]
         self.normalPositions = {}
         self.min = [1e9,1e9,1e9]
-        self.max = [-1e9,-1e9,-1e9] 
-            
+        self.max = [-1e9,-1e9,-1e9]
+
         self.min[0] = min(x for x, _, _ in self.positions.values())
         self.max[0] = max(x for x, _, _ in self.positions.values())
         self.max[0] -= self.min[0]
-        
+
         self.min[1] = min(y for _, y, _  in self.positions.values())
         self.max[1] = max(y for _, y, _  in self.positions.values())
         self.max[1] -= self.min[1]
@@ -122,7 +122,7 @@ class Jelka:
         while running:
             if any(color is None for color in colors):
                 running = False
-                break  
+                break
             self.set_colors(shader(self.colors,int(time.time() * 1000) - started_time,frame))
             tmp_last_time = time.time()
             time.sleep(max(1 / self.refresh_rate - (time.time() - last_time), 0.01))

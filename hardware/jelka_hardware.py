@@ -34,6 +34,6 @@ if __name__ == '__main__':
             strip.show()
             time.sleep(0.1)
             i += 1
-            
+
     except KeyboardInterrupt:
         pass
