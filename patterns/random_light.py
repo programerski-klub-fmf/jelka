@@ -2,7 +2,7 @@ from library.jelka import Jelka, Color, Id, Position, Time
 import random as r
 from library.patterns_lib import vivid, random_color
 
-jelka = Jelka(file="data/random_tree.csv")
+jelka = Jelka(file="data/lucke3d.csv")
 
 
 @jelka.run_shader_all

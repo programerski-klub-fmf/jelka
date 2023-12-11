@@ -57,7 +57,7 @@ class Simulation:
         self.colors = [(randint(0, 255), randint(0, 255), randint(0, 255)) for _ in self.smreka]
 
         self.scale = 1
-        self.camera = (0, -500, 50)
+        self.camera = (0, -500, 100)
 
     def set_colors(self, colors):
         if not self.running:
