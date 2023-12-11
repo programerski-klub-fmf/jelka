@@ -1,10 +1,10 @@
 import math
-from library.jelka import Jelka, Color, Id, Position, Time
+#from library.jelka import Color
 import random as r
 
 
-def clamp(c: Color):
-    return (min(255, max(c[0], 0)), min(255, max(c[1], 0)), min(255, max(c[1], 0)))
+def clamp(c: list[int]):
+    return [min(255, max(c[0], 0)), min(255, max(c[1], 0)), min(255, max(c[1], 0))]
 
 
 def dist(p):
@@ -49,7 +49,7 @@ def normalize(positions):
     return positions
 
 
-def vivid(c: Color):
+def vivid(c: list[int]):
     c = list(c)
     m = min(c[0], c[1], c[2])
     if c[0] == m:
