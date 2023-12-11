@@ -67,17 +67,17 @@ class Jelka:
             raise ValueError(f"Unsuported type {type(colors)} for colors.")
 
     def get_color(self, id: Id) -> Color:
-        if id >= len(self.colors) or id < 0: 
+        if id >= len(self.colors) or id < 0:
             return [0,0,0]
         return self.colors[id]
 
     def get_real_pos(self, id: Id) -> Position:
-        if id >= len(self.positions) or id < 0: 
+        if id >= len(self.positions) or id < 0:
             return [0,0,0]
         return self.positions[id]
 
     def get_pos(self, id: Id) -> Position:
-        if id >= len(self.normalPositions) or id < 0: 
+        if id >= len(self.normalPositions) or id < 0:
             return [0,0,0]
         return self.normalPositions[id]
 
