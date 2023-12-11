@@ -117,7 +117,9 @@ class Jelka:
     @nice_exit  # TODO pobriši in naredi lepo in malo bolj bug resistant
     def run_shader_all(
         self,
-        shader: Callable[[list[Color], Time, Time], dict[Id, Color] | list[Color] | defaultdict[Id, Color] | None],
+        shader: Callable[
+            [list[Color], Time, Time], dict[Id, Color] | list[Color] | defaultdict[Id, Color] | None
+        ],
     ) -> None:
         """enako kot run_shader, edino da poda "frame" info in pa da zahteva da nastavi vse lucke"""
         started_time = int(time.time() * 1000)
