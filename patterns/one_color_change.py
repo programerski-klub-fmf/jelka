@@ -5,7 +5,7 @@ jelka = Jelka(file="data/lucke3d.csv")
 
 @jelka.run_shader
 def color_change(id: int, time: int) -> Color:
-    color = jelka.get_color(id)
+    # color = jelka.get_color(id)
     x, y, z = jelka.get_pos(id)
     z *= 256
     return (z % 256, z % 256, z % 256)
