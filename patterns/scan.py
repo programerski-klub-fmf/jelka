@@ -14,11 +14,13 @@ def update_colors(colors: list(Color), time: int, frame: int):
 
     global col
     global change
-    if frame == 0: change = 0
+    if frame == 0:
+        change = 0
     if (frame == 0 or zup < 0 or zup > 1.1) and change == 0:
         change = 1
         col = vivid(random_color())
-    elif zup > 0.01 and zup < 0.99: change = 0
+    elif zup > 0.01 and zup < 0.99:
+        change = 0
 
     for i in range(0, len(colors)):
         pos = jelka.get_pos(i)

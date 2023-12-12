@@ -39,7 +39,7 @@ def vzorec(vzorec):
 
 @http.route("/", methods=["GET"])
 def index():
-	return flask.render_template("index.html");
+	return flask.render_template("index.html")
 
 @http.route("/stream/", methods=["GET"])
 def stream():

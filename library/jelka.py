@@ -4,11 +4,7 @@ from typing import Any, Callable, cast
 import time
 from .mat import Matrix
 from library.patterns_lib import normalize
-
-Color = tuple[int, int, int]
-Id = int
-Position = tuple[float, float, float]
-Time = int
+from library.types import Id, Color, Position, Time
 
 
 def nice_exit(func: Callable) -> Callable:
@@ -68,17 +64,17 @@ class Jelka:
 
     def get_color(self, id: Id) -> Color:
         if id >= len(self.colors) or id < 0:
-            return [0,0,0]
+            return (0, 0, 0)
         return self.colors[id]
 
     def get_real_pos(self, id: Id) -> Position:
         if id >= len(self.positions) or id < 0:
-            return [0,0,0]
+            return (0, 0, 0)
         return self.positions[id]
 
     def get_pos(self, id: Id) -> Position:
         if id >= len(self.normalPositions) or id < 0:
-            return [0,0,0]
+            return (0, 0, 0)
         return self.normalPositions[id]
 
     @nice_exit
@@ -103,9 +99,7 @@ class Jelka:
     @nice_exit  # TODO pobriši in naredi lepo in malo bolj bug resistant
     def run_shader_all(
         self,
-        shader: Callable[
-            [list[Color], Time, Time], dict[Id, Color] | list[Color] | defaultdict[Id, Color] | None
-        ],
+        shader: Callable[[list[Color], Time, Time], list[Color]],
     ) -> None:
         """enako kot run_shader, edino da poda "frame" info in pa da zahteva da nastavi vse lucke"""
         started_time = int(time.time() * 1000)
