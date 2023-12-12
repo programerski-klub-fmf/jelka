@@ -31,7 +31,13 @@ def get_min(positions):
     return mnn
 
 
-def normalize(positions):
+def normalize(positions, offset = [0,0,0]):
+    positions = list(positions)
+    for i in range(0,len(positions)):
+        positions[i] = [2*positions[i][0] - offset[0],
+                        2*positions[i][1] - offset[1], 
+                        2*positions[i][2] - offset[2]]
+    
     mx = get_max(positions)
     mn = get_min(positions)
     mx[0] -= mn[0]
