@@ -41,7 +41,7 @@ def random_tree(n=300, origin=(0, 0, 0), height=200, max_width=120, min_width=60
 
 def draw_lucka(pygame, lucka, screen, size, color, scale):
     w, h = pygame.display.get_surface().get_size()
-    pygame.draw.circle(screen, color, (w * lucka[0] * scale + w // 2, (-w * lucka[1] * scale + h // 2)), size)
+    pygame.draw.circle(screen, color, (w * lucka[0] * scale + w // 2, (-w * lucka[1] * scale + h // 2)), size+3)
 
 
 class Simulation:
