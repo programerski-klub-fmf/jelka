@@ -6,20 +6,29 @@ from library.spheres import Sphere
 
 jelka = Jelka(file="data/lucke3d.csv")
 
-sph = Sphere((0.5, 0.5, 1), 0.2)
-sph.set_start(sph.center)
-sph.set_end((0.2, 0., 0))
-sph.set_speed(0.01)
+
+sph = []
+
+for i in range(0,3):
+    sph.append(Sphere((0.5,0.5,1.2),0.2))
+    sph[i].set_center((0.5+ r.uniform(-0.2,0.2), 0.5 + r.uniform(-0.2,0.2), 1 + r.uniform(0.0,0.3)))
+    sph[i].set_radius(0.1)
+    sph[i].set_start(sph[i].get_center())
+    sph[i].set_end((r.uniform(-1.0,1.0), r.uniform(-1.0,1.0), -0.5 + r.uniform(-2.0,0.4)))
+    #sph[i].set_end((0,0,0))
+    sph[i].set_speed(0.01)
 
 
 @jelka.run_shader_all
 def update_colors(colors: list[Color], time: int, frame: int):
-    sph.update_pos(frame)
-
+    for i in range(len(sph)):
+        sph[i].update_pos()
+            
+            
     for i in range(len(colors)):
         pos = jelka.get_pos(i)
-        if sph.isIn(pos):
-            colors[i] = (0, 0, 255)
-        else:
-            colors[i] = (0,255, 0)
+        colors[i] = (0,255,0)
+        for j in range(len(sph)):
+            if sph[j].isIn(pos):
+                colors[i] = (0, 0, 255)
     return colors
