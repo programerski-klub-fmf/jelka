@@ -2,6 +2,8 @@ from library.jelka import Jelka, Color, Id, Position, Time
 import math
 from library.patterns_lib import vivid
 
+# NAME: Gradient
+
 jelka = Jelka(file="data/lucke3d.csv")
 
 

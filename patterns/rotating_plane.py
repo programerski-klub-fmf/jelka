@@ -3,6 +3,8 @@ import math
 import random as r
 from library.patterns_lib import dist, normalize, vivid, random_color
 
+# NAME: Rotating Plane
+
 jelka = Jelka(file="data/lucke3d.csv")
 
 

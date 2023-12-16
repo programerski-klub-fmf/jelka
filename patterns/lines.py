@@ -3,6 +3,8 @@ from library.jelka import Jelka, Color, Id, Position, Time
 from typing import Any, Callable, cast
 from library.patterns_lib import random_color, vivid
 
+# NAME: Lines
+
 jelka = Jelka(file="data/lucke3d.csv")
 
 
