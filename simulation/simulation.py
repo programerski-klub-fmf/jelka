@@ -41,7 +41,19 @@ def random_tree(n=300, origin=(0, 0, 0), height=200, max_width=120, min_width=60
 
 def draw_lucka(pygame, lucka, screen, size, color, scale):
     w, h = pygame.display.get_surface().get_size()
-    pygame.draw.circle(screen, color, (w * lucka[0] * scale + w // 2, (-w * lucka[1] * scale + h // 2)), size+3)
+    pygame.draw.circle(
+        screen, color, (w * lucka[0] * scale + w // 2, (-w * lucka[1] * scale + h // 2)), size + 1
+    )
+
+
+def draw_line(pygame, p1, p2, screen, color, scale):
+    w, h = pygame.display.get_surface().get_size()
+    pygame.draw.line(
+        screen,
+        (10, 10, 10),
+        (w * p1[0] * scale + w // 2, (-w * p1[1] * scale + h // 2)),
+        (w * p2[0] * scale + w // 2, (-w * p2[1] * scale + h // 2)),
+    )
 
 
 class Simulation:
@@ -50,11 +62,11 @@ class Simulation:
         self.phi, self.tau = 0, 0
 
         if smreka is None:
-            self.smreka = list(random_tree())
+            self.smreka = {i: pos for i, pos in enumerate(random_tree())}
         else:
-            self.smreka = list(smreka)
-        self.points = [Matrix([[p[0]], [p[1]], [p[2]]]) for p in self.smreka]
-        self.colors = [(randint(0, 255), randint(0, 255), randint(0, 255)) for _ in self.smreka]
+            self.smreka = smreka.copy()
+        self.points = {i: Matrix([[p[0]], [p[1]], [p[2]]]) for i, p in self.smreka.items()}
+        self.colors = {i: (randint(0, 255), randint(0, 255), randint(0, 255)) for i in self.smreka}
 
         self.scale = 1
         self.camera = (0, -500, 100)
@@ -62,7 +74,7 @@ class Simulation:
     def set_colors(self, colors):
         if not self.running:
             raise InterruptedError("Simulation stopped.")
-        self.colors = [tuple(color) for color in colors]
+        self.colors = {pk: tuple(color) for pk, color in colors.items()}
 
     def init(self):
         import pygame
@@ -102,9 +114,15 @@ class Simulation:
         self.screen.fill("black")
 
         r = Matrix.rotation(self.phi, self.tau)
-        for p, c in zip(map(lambda x: (r * x).proj(self.camera), self.points), self.colors):
+        prev = None
+        for i, p in sorted(self.points.items()):
+            p = (r * p).proj(self.camera)
+            c = self.colors.get(i, (0, 0, 0))
             if p[2] > 0:
                 draw_lucka(pygame, (p[0], p[1]), self.screen, max(20 / p[2], 1), c, self.scale)
+                if prev and prev[2] > 0:
+                    draw_line(pygame, p, prev, self.screen, c, self.scale)
+            prev = p
         p = (r * Matrix([[0], [0], [0]])).proj(self.camera)
         draw_lucka(pygame, (p[0], p[1]), self.screen, max(20 / p[2], 1), (0, 255, 0), self.scale)
         pygame.display.flip()
@@ -123,11 +141,11 @@ class Hardware:
             self.simulation = Simulation()
         else:
             self.simulation = Simulation(
-                smreka=[
-                    tuple(map(float, (line.split(",")[1:])))
+                smreka={
+                    int(line.split(",")[0]): tuple(map(float, (line.split(",")[1:])))
                     for line in open(file).read().split("\n")
                     if line != ""
-                ]
+                }
             )
 
         self.thread = Thread(target=self._run)
@@ -144,11 +162,28 @@ class Hardware:
             self.simulation.quit()
 
     def set_colors(self, colors: list[tuple[int, int, int]]) -> None:
-        self.simulation.set_colors(colors)
+        self.simulation.set_colors({i: color for i, color in enumerate(colors)})
 
 
 if __name__ == "__main__":
+    rt = list(random_tree())
     with open("data/random_tree.csv", "w+") as f:
-        for i, (x, y, z) in enumerate(random_tree()):
+        for i, (x, y, z) in enumerate(rt):
             f.write(f"{i},{x},{y},{z}\n")
+    rt = {
+        int(line.split(",")[0]): tuple(map(float, (line.split(",")[1:])))
+        for line in open("data/lucke3d.csv").read().split("\n")
+        if line != ""
+    }
+    scale = 0.2372479240806643
+    lz = 1068
+    cx = 880
+    with open("data/3d_to_2d.csv", "w+") as f:
+        for i, (x, y, z) in ((i, rt[i]) for i in rt):
+            for pogled in range(4):
+                rot = Matrix.rotation(pogled * math.pi / 2, 0)
+                v = rot * Matrix([[x], [y], [z]])
+                xp = v[0][0]  # / scale + cx
+                zp = lz - v[2][0] / scale
+                f.write(f"{i},{int(xp)},{int(zp)},{pogled}\n")
     h = Hardware(file=None)
