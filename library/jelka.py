@@ -68,7 +68,7 @@ class Jelka:
         return self.colors[id]
 
     def get_real_pos(self, id: Id) -> Position:
-        if id >= len(self.positions) or id < 0:
+        if id not in self.positions:
             return (0, 0, 0)
         return self.positions[id]
 
