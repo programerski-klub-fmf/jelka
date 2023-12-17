@@ -108,8 +108,14 @@ def zaznaj_smrt():
 	current_process.wait()
 	začni_vzorec.set()
 
+
 die = False
 subprocess_manager_thread = None
+display_manager_thread = None
+
+začni_vzorec = threading.Event()
+sprememba_stanja = threading.Event()
+
 
 def subprocess_manager():
 	global forced_pattern
@@ -147,8 +153,42 @@ def subprocess_manager():
 		current_process.send_signal(subprocess.signal.SIGINT)
 		current_process.wait()
 
-začni_vzorec = threading.Event()
-sprememba_stanja = threading.Event()
+
+def display_manager():
+	# TODO: Initialize display...
+
+	# What should be on display:
+	# - Pattern name
+	# - Time until next pattern
+	# - Link to website
+	# - Anything else?
+
+	current_pattern_name: str | None = None
+	current_pattern_start: float | None = None
+
+	while True:
+		try:
+			new_pattern_name = next(pattern[0] for pattern in get_patterns() if pattern[1] == current_pattern)
+		except StopIteration:
+			začni_vzorec.wait(timeout=5)
+			continue
+
+		if new_pattern_name != current_pattern_name:
+			current_pattern_name = new_pattern_name
+			current_pattern_start = time.time()
+
+		remaining_time = int(round(pattern_time + current_pattern_start - time.time(), 0))
+		remaining_minutes = remaining_time // 60
+		remaining_seconds = remaining_time % 60
+		remaining_display = f"{remaining_minutes:02d}:{remaining_seconds:02d}"
+
+		print("CURRENT", new_pattern_name, remaining_display)
+
+		# TODO: Draw to display: Pattern name, link to website, remaning time...
+		# Probably needs some scrolling next...
+
+		time.sleep(0.05)
+
 
 def samomor(signal_descriptor, stack_frame):
 	global die
@@ -179,3 +219,7 @@ if __name__ == "__main__":
 
 	subprocess_manager_thread = threading.Thread(target=subprocess_manager)
 	subprocess_manager_thread.start()
+
+	# TODO: Uncomment this when ready
+	# display_manager_thread = threading.Thread(target=display_manager)
+	# display_manager_thread.start()
