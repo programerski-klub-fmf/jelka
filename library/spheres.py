@@ -1,4 +1,4 @@
-from library.patterns_lib import dist
+from library.patterns_lib import distance
 from library.types import Position
 
 
@@ -21,7 +21,7 @@ class Sphere:
         return (self.center[0] - pt[0], self.center[1] - pt[1], self.center[2] - pt[2])
 
     def isIn(self, pt: Position) -> bool:
-        if dist(self.sphereDiff(pt)) <= self.radius:
+        if distance(self.sphereDiff(pt)) <= self.radius:
             return True
         return False
 
@@ -61,7 +61,7 @@ class Sphere:
             self.center[1] + vec[1] * self.speed,
             self.center[2] + vec[2] * self.speed,
         )
-        if dist(self.sphereDiff(self.startpos)) > dist(
+        if distance(self.sphereDiff(self.startpos)) > distance(
             (
                 self.startpos[0] - self.endpos[0],
                 self.startpos[1] - self.endpos[1],

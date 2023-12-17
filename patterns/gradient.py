@@ -1,4 +1,4 @@
-from library.jelka import Jelka, Color, Id, Position, Time
+from library.jelka import Jelka, Color, Id, TimeMs
 import math
 from library.patterns_lib import vivid
 
@@ -8,8 +8,8 @@ jelka = Jelka(file="data/lucke3d.csv")
 
 
 @jelka.run_shader
-def color_change(id: int, time: int) -> Color:
-    pos = list(jelka.get_pos(id))
+def color_change(id: int, time: int, frame: int) -> Color:
+    pos = list(jelka.get_position_normalized(id))
     return vivid(
         (
             (pos[0] * 255 + math.sin(time / 5000 + 1) * 255 + 256) % 256,

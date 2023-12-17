@@ -1,5 +1,5 @@
 import random as r
-from library.jelka import Jelka, Color, Id, Position, Time
+from library.jelka import Jelka, Color, TimeMs
 from typing import Any, Callable, cast
 from library.patterns_lib import random_color, vivid
 
@@ -9,7 +9,8 @@ jelka = Jelka(file="data/lucke3d.csv")
 
 
 @jelka.run_shader_all
-def update_colors(colors: list(Color), time: int, frame: int):
+def update_colors(time: int, frame: int):
+    colors = jelka.colors
     if frame == 0:
         global col
         global spawnRate

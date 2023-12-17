@@ -8,7 +8,7 @@ jelka = Jelka(file="data/lucke3d.csv")
 
 
 @jelka.run_shader
-def color_change(id: int, time: int) -> Color:
+def color_change(id: int, time: int, frame: int) -> Color:
     hue = rgb_to_hsv(*jelka.get_color(id))[0] * 360
     hue = (hue + 1) % 360
 

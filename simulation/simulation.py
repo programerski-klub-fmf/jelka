@@ -50,7 +50,7 @@ def draw_line(pygame, p1, p2, screen, color, scale):
     w, h = pygame.display.get_surface().get_size()
     pygame.draw.line(
         screen,
-        (10, 10, 10),
+        color,
         (w * p1[0] * scale + w // 2, (-w * p1[1] * scale + h // 2)),
         (w * p2[0] * scale + w // 2, (-w * p2[1] * scale + h // 2)),
     )
@@ -74,6 +74,13 @@ class Simulation:
     def set_colors(self, colors):
         if not self.running:
             raise InterruptedError("Simulation stopped.")
+        try:
+            for i, c in colors.items():
+                assert all(isinstance(c[i], int) for i in range(3))
+                assert all(0 <= c[i] <= 255 for i in range(3))
+        except AssertionError:
+            self.running = False
+            raise ValueError(f"Wrong shape for color: ({i}: {c})") from None
         self.colors = {pk: tuple(color) for pk, color in colors.items()}
 
     def init(self):
@@ -115,14 +122,17 @@ class Simulation:
 
         r = Matrix.rotation(self.phi, self.tau)
         prev = None
-        for i, p in sorted(self.points.items()):
-            p = (r * p).proj(self.camera)
-            c = self.colors.get(i, (0, 0, 0))
-            if p[2] > 0:
-                draw_lucka(pygame, (p[0], p[1]), self.screen, max(20 / p[2], 1), c, self.scale)
-                if prev and prev[2] > 0:
-                    draw_line(pygame, p, prev, self.screen, c, self.scale)
+        projected = {i: (r * p).proj(self.camera) for i, p in self.points.items()}
+
+        for _, p in sorted(projected.items()):
+            if p[2] > 0 and prev and prev[2] > 0:
+                draw_line(pygame, p, prev, self.screen, (10, 10, 10), self.scale)
             prev = p
+
+        for i, p in projected.items():
+            c = self.colors.get(i, (0, 0, 0))
+            draw_lucka(pygame, (p[0], p[1]), self.screen, max(20 / p[2], 1), c, self.scale)
+
         p = (r * Matrix([[0], [0], [0]])).proj(self.camera)
         draw_lucka(pygame, (p[0], p[1]), self.screen, max(20 / p[2], 1), (0, 255, 0), self.scale)
         pygame.display.flip()

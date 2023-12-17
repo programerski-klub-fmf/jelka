@@ -305,8 +305,8 @@ single = {
 
 
 @jelka.run_shader
-def color_change(id: int, time: int) -> Color:
-    x, y, z = jelka.get_real_pos(id)
+def color_change(id: int, time: int, frame: int) -> Color:
+    x, y, z = jelka.get_position_cm(id)
     if (x, y, z) == (0, 0, 0):
         return (0, 0, 100)
     if id in single:

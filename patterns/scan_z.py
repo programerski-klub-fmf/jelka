@@ -12,7 +12,8 @@ threshold = 0.1
 
 
 @jelka.run_shader_all
-def update_colors(colors: list[Color], time: int, frame: int):
+def update_colors(time: int, frame: int):
+    colors = jelka.colors
     coord = math.sin(frame / 80) / 1.8 + 0.55
 
     global color
@@ -28,7 +29,7 @@ def update_colors(colors: list[Color], time: int, frame: int):
         change = 0
 
     for i in range(0, len(colors)):
-        pos = jelka.get_pos(i)
+        pos = jelka.get_position_normalized(i)
         if coord >= pos[axis] >= coord - threshold:
             colors[i] = color
         else:

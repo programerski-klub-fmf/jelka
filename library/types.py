@@ -1,4 +1,7 @@
 Color = tuple[int, int, int]
 Id = int
 Position = tuple[float, float, float]
-Time = int
+PositionCm = tuple[float, float, float]
+PositionNormalized = tuple[float, float, float]
+PositionRelative = tuple[float, float, float]
+TimeMs = int

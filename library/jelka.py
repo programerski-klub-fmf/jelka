@@ -3,8 +3,8 @@ from collections import defaultdict
 from typing import Any, Callable, cast
 import time
 from .mat import Matrix
-from library.patterns_lib import normalize
-from library.types import Id, Color, Position, Time
+from library.patterns_lib import normalize, distance
+from library.types import Id, Color, PositionCm, PositionNormalized, PositionRelative, TimeMs
 
 
 def nice_exit(func: Callable) -> Callable:
@@ -17,13 +17,19 @@ def nice_exit(func: Callable) -> Callable:
     return wrapper
 
 
+def to_color(t: Any) -> Color:
+    r = (int(t[0]), int(t[1]), int(t[2]))
+    assert all(0 <= x <= 255 for x in r)
+    return r
+
+
 class Jelka:
     def __init__(self, file: str | None = None) -> None:
         # TODO : lastnosti smreke: višina, širina, število lučk, refresh rate, čas simulacije?
         self.count = 300
         self.refresh_rate = 20  # / s
 
-        self.colors: list[Color] = [(0, 0, 0) for _ in range(self.count)]
+        self._colors: list[Color] = [(0, 0, 0) for _ in range(self.count)]
         if file is None:
             if hasattr(Hardware, "is_simulation") and Hardware.is_simulation:
                 file = "data/random_tree.csv"
@@ -31,75 +37,77 @@ class Jelka:
                 file = "data/lucke3d.csv"
         self.hardware = Hardware(file=file)
 
-        self.positions: dict[Id, Position] = {}
+        self.positions_cm: dict[Id, PositionCm] = {}
         with open(file) as f:
             for line in f.readlines():
                 line = line.strip()
                 if line == "":
                     continue
                 i, x, y, z = line.split(",")
-                self.positions[int(i)] = (float(x), float(y), float(z))
+                self.positions_cm[int(i)] = (float(x), float(y), float(z))
 
-        # calculate positions normalized to [0,1]  # TODO popravi
-        self.normalPositions = normalize(list(self.positions.values()))
+        # calculate positions relative to the center of the tree whith max radius 1 and height 1
+        max_r = max(distance(p[:2]) for p in self.positions_cm.values())
+        max_h = max(p[2] for p in self.positions_cm.values())
+        self.positions_relative: dict[Id, PositionRelative] = {
+            i: (p[0] / max_r, p[1] / max_r, p[2] / max_h) for i, p in self.positions_cm.items()
+        }
+        # calculate positions normalized to [0,1]
+        self.positions_normalized: dict[Id, PositionNormalized] = normalize(self.positions_cm)
 
         self.screen_mapping: dict[tuple[int, int], list[int]] = dict()
         self.screen_size: tuple[int, int] = (160, 160)
         self.new_screen_mapping()
 
+    @property
+    def colors(self) -> list[Color]:
+        return [(color[0], color[1], color[2]) for color in self._colors]
+
     def set_colors(self, colors: dict[Id, Color] | list[Color] | defaultdict[Id, Color]) -> None:
         if isinstance(colors, list):
             if len(colors) != self.count:
-                raise ValueError(f"Seznam barv mora biti enak številu lučk Jelka.count = {self.count}.")
-            self.colors = [cast(Color, color) for color in colors]
-            self.hardware.set_colors(self.colors)
+                raise ValueError(f"Seznam barv mora imeti enako število lučk kot Jelka.count = {self.count}.")
+            self._colors = [to_color(color) for color in colors]
+            self.hardware.set_colors(self._colors)
         elif isinstance(colors, defaultdict):
-            self.colors = [colors[i] for i in range(self.count)]
-            self.hardware.set_colors(self.colors)
+            self._colors = [to_color(colors[i]) for i in range(self.count)]
+            self.hardware.set_colors(self._colors)
         elif isinstance(colors, dict):
-            self.colors = [colors[i] if i in colors else (0, 0, 0) for i in range(self.count)]
-            self.hardware.set_colors(self.colors)
+            self._colors = [to_color(colors[i]) if i in colors else (0, 0, 0) for i in range(self.count)]
+            self.hardware.set_colors(self._colors)
         else:
             raise ValueError(f"Unsuported type {type(colors)} for colors.")
 
     def get_color(self, id: Id) -> Color:
-        if id >= len(self.colors) or id < 0:
+        if id >= len(self._colors) or id < 0:
             return (0, 0, 0)
-        return self.colors[id]
+        return self._colors[id]
 
-    def get_real_pos(self, id: Id) -> Position:
-        if id not in self.positions:
+    def get_position_cm(self, id: Id) -> PositionCm:
+        if id not in self.positions_cm:
             return (0, 0, 0)
-        return self.positions[id]
+        return self.positions_cm[id]
 
-    def get_pos(self, id: Id) -> Position:
-        if id >= len(self.normalPositions) or id < 0:
+    def get_position_relative(self, id: Id) -> PositionRelative:
+        if id not in self.positions_relative:
             return (0, 0, 0)
-        return self.normalPositions[id]
+        return self.positions_relative[id]
 
-    @nice_exit
-    def run_shader(self, shader: Callable[[Id, Time], Color | None]) -> None:
+    def get_position_normalized(self, id: Id) -> PositionNormalized:
+        if id not in self.positions_normalized:
+            return (0, 0, 0)
+        return self.positions_normalized[id]
+
+    def run_shader(self, shader: Callable[[Id, TimeMs, int], Color | None]) -> None:
         """Sprejme shader funkcijo, ki sprejme id lučke in čas v milisekundah od začetka simulacije in vrne barvo
         v obliki (r, g, b). Ko shader vrne None za vsaj eno lučko, se simulacija konča.
         """
-        started_time = int(time.time() * 1000)
-        running = True
-        colors = [shader(i, 0) for i in range(self.count)]
-        last_time = time.time()
-        while running:
-            if any(color is None for color in colors):
-                running = False
-                break
-            self.set_colors(cast(list[Color], colors))
-            tmp_last_time = time.time()
-            colors = [shader(i, int(time.time() * 1000) - started_time) for i in range(self.count)]
-            time.sleep(max(1 / self.refresh_rate - (time.time() - last_time), 0.01))
-            last_time = tmp_last_time
+        self.run_shader_all(lambda time, frame: [shader(i, time, frame) for i in range(self.count)])
 
     @nice_exit  # TODO pobriši in naredi lepo in malo bolj bug resistant
     def run_shader_all(
         self,
-        shader: Callable[[list[Color], Time, Time], list[Color]],
+        multi_shader: Callable[[TimeMs, int], list[Color]],
     ) -> None:
         """enako kot run_shader, edino da poda "frame" info in pa da zahteva da nastavi vse lucke"""
         started_time = int(time.time() * 1000)
@@ -111,9 +119,9 @@ class Jelka:
             if any(color is None for color in colors):
                 running = False
                 break
-            colors = shader(self.colors, int(time.time() * 1000) - started_time, frame)
             self.set_colors(cast(list[Color], colors))
             tmp_last_time = time.time()
+            colors = multi_shader(int(time.time() * 1000) - started_time, frame)
             time.sleep(max(1 / self.refresh_rate - (time.time() - last_time), 0.01))
             last_time = tmp_last_time
             frame += 1
@@ -125,8 +133,8 @@ class Jelka:
         translation: tuple[float, float, float] = (0, 0, 0),
         positive_only: bool = False,
     ) -> None:
-        min_z = min(z for _, _, z in self.positions.values())
-        max_z = max(z for _, _, z in self.positions.values())
+        min_z = min(z for _, _, z in self.positions_cm.values())
+        max_z = max(z for _, _, z in self.positions_cm.values())
         scale = size[1] / (max_z - min_z)
 
         self.screen_size = cast(tuple[int, int], tuple(size))
@@ -134,7 +142,7 @@ class Jelka:
         self.screen_mapping = {(x, y): [] for x in range(size[0]) for y in range(size[1])}
 
         # za vsako lučko izračunamo njeno pravokotno projekcijo na zaslon
-        for i, (x, y, z) in self.positions.items():
+        for i, (x, y, z) in self.positions_cm.items():
             moved = tranformation * Matrix([[x], [y], [z]])
             moved = (moved[0][0] + translation[0], moved[1][0] + translation[1], moved[2][0] + translation[2])
             if positive_only and moved[1] < 0:
