@@ -52,6 +52,9 @@ cache/
 tmp/
 data/random_tree.csv
 data/points.csv
+data/bf_lucke3d.csv
+data/random_tree2d.csv
+data/3d_to_2d.csv
 .eslintcache
 .ruff_cache
 .mypy_cache
