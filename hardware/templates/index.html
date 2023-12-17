@@ -1,107 +1,189 @@
-<meta name=viewport content='width=device-width, initial-scale=1.0'>
-<title>jelka na fmf</title>
-<h1>jelka na fmf</h1>
-<label for=geslo>geslo: </label><input onchange=geslochange() id=geslo type=text placeholder=geslo /> (geslo najdete na LED zaslonu)
-<br>
-<label for=čas>čas vzorca v sekundah: </label><input id=čas type=number placeholder=10 min=1 max=300 /> <button onclick=nastavi_čas()>nastavi!</button>
-<br>
-<!-- enkrat poženi poljuben vzorec: <input type=file id=file /> <button id=poženi>poženi</button> -->
-<ul id=vzorci></ul>
+<!doctype html>
+<html lang="sl">
+  <head>
+    <title>Jelka FMF</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
+    <link rel="icon" href="https://cdn.jsdelivr.net/gh/jdecked/twemoji@14.1.2/assets/svg/1f384.svg" integrity="sha384-8t7HgZ0kc9RpvkZooJMGfJVhrqj6k5Pz7aipjvaVaJQep8Yg6rMKfb30CxL2iWHe" crossorigin="anonymous" />
+    <style>tr:last-child td{border-bottom:0;}</style>
+  </head>
+  <body>
+    <div class="container-fluid pt-2">
+      <h1>Jelka FMF</h1>
+      <div class="pb-4">
+        <table class="table" style="max-width:500px;">
+          <tbody id="patterns"></tbody>
+        </table>
+      </div>
+      <div>
+        <div class="pb-3">
+          <label for="password" class="col-form-label">Geslo:</label>
+          <input type="password" id="password" class="form-control form-control-sm" style="max-width:500px;" onchange="changePassword()" />
+        </div>
+        <div class="pb-3">
+          <label for="time" class="col-form-label">Čas vzorca:</label>
+          <div class="input-group flex-nowrap" style="max-width:500px;">
+            <input type="number" min="1" max="600" step="1" id="time" class="form-control form-control-sm" />
+            <span class="input-group-text">s</span>
+          </div>
+        </div>
+        <div class="col-auto">
+          <button class="btn btn-sm btn-primary" onclick="setTime()">Nastavi</button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
 <script>
-	document.addEventListener("DOMContentLoaded", (event) => {
-		console.log("alo")
-		console.log(geslo);
-		geslo.value = localStorage.getItem("geslo");
-	});
-	function geslochange () {
-		localStorage.setItem("geslo", geslo.value);
-	}
-	function nastavi_čas() {
-		if (geslo.value == "") {
-			alert("nastavite geslo!");
-			return;
-		}
-		fetch(geslo.value, {
-			method: "POST",
-			body: JSON.stringify({
-				"čas": Number(čas.value)
-			}),
-		}).then(data => {
-			data.json().then(json => {
-				if (Object.keys(json).includes("napaka")) {
-					alert(json.napaka.besedilo)
-				}
-			})
-		});
-	}
-	geslo.value = location.hash.substr(1);
-	function setupeventsource () {
-		const evt = new EventSource("stream/");
-		evt.onerror = (e) => {
-			evt.close();
-			setTimeout(setupeventsource, 1000);
-		};
-		evt.onmessage = (e) => {
-			data = JSON.parse(e.data);
-			console.log(data);
-			čas.value = data.čas;
-			vzorci.innerHTML = "";
-			for (let i = 0; i < data.vzorci.length; i++) {
-				const li = document.createElement("li");
-				const začni = document.createElement("button");
-				const a = document.createElement("a");
-				začni.innerText = "začni";
-				a.innerText = data.vzorci[i];
-				a.href = "vzorci/" + data.vzorci[i];
-				li.appendChild(a);
-				začni.onclick = () => {
-					if (geslo.value == "") {
-						alert("nastavite geslo!");
-						return;
-					}
-					fetch(geslo.value, {
-						method: "POST",
-						body: JSON.stringify({
-							"začni": data.vzorci[i]
-						}),
-					}).then(data => {
-						data.json().then(json => {
-							if (Object.keys(json).includes("napaka")) {
-								alert(json.napaka.besedilo)
-							}
-						})
-					});
-				};
-				li.appendChild(začni);
-				const stanje = document.createElement("button");
-				stanje.innerText = "onemogoči";
-				if (data.onemogočeni.includes(data.vzorci[i]))
-					stanje.innerText = "omogoči";
-				stanje.onclick = () => {
-					if (geslo.value == "") {
-						alert("nastavite geslo!");
-						return;
-					}
-					fetch(geslo.value, {
-						method: "POST",
-						body: "{\"" + stanje.innerText + "\": [\"" + data.vzorci[i] + "\"]}",
-					}).then(data => {
-						data.json().then(json => {
-							if (Object.keys(json).includes("napaka")) {
-								alert(json.napaka.besedilo)
-							}
-						})
-					});
-				};
-				li.appendChild(stanje);
-				if (data["trenuten"] == data.vzorci[i]) {
-					const spa = document.createElement("span");
-					spa.innerText = " (trenuten)";
-					li.appendChild(spa);
-				}
-				vzorci.appendChild(li);
-			}
-		}
-	}
-	setupeventsource();
+  const patterns = document.getElementById('patterns')
+  const password = document.getElementById('password')
+  const time = document.getElementById('time')
+
+  document.addEventListener('DOMContentLoaded', _ => {
+    if (location.hash.substr(1)) {
+      password.value = location.hash.substr(1)
+      changePassword()
+    } else {
+      password.value = localStorage.getItem('password')
+    }
+  })
+
+  function changePassword () {
+    localStorage.setItem('password', password.value)
+  }
+
+  async function callApi (request) {
+    if (password.value === '') {
+      alert('Nastavite geslo!')
+      return
+    }
+
+    changePassword()
+
+    const response = await fetch(password.value, { method: 'POST', body: JSON.stringify(request) })
+    const data = await response.json()
+    if (Object.keys(data).includes('napaka')) {
+      alert(data.napaka.besedilo)
+    }
+  }
+
+  async function setTime () {
+    await callApi({ 'čas': Number(time.value) })
+  }
+
+  function setupEventSource () {
+    const evt = new EventSource('stream/')
+
+    evt.onerror = _ => {
+      evt.close()
+      setTimeout(setupEventSource, 1000)
+    }
+
+    evt.onmessage = message => {
+      const data = JSON.parse(message.data)
+      console.log(data)
+
+      time.value = data.time
+      patterns.innerHTML = ''
+
+      const enabledPatterns = data.patterns.filter(pattern => pattern[2])
+
+      const currentIndex = enabledPatterns.findIndex(pattern => pattern[1] === data.current)
+      console.log(currentIndex)
+
+      for (const pattern of data.patterns) {
+        const patternRow = document.createElement('tr')
+
+        const countdownCol = document.createElement('td')
+        countdownCol.style.width = '50px'
+        countdownCol.classList.add('countdown')
+        if (pattern[1] === data.current) {
+          countdownCol.innerText = '00:00'
+          countdownCol.setAttribute('seconds', 0)
+        } else if (pattern[2] === false) {
+          countdownCol.innerText = '--:--'
+          countdownCol.setAttribute('seconds', 0)
+          countdownCol.classList.add('text-muted')
+        } else {
+          const myIndex = enabledPatterns.indexOf(pattern)
+
+          let seconds = 0
+          if (myIndex > currentIndex) {
+            seconds = (myIndex - currentIndex) * data.time
+          } else {
+            seconds = (enabledPatterns.length - currentIndex + myIndex) * data.time
+          }
+
+          countdownCol.setAttribute('seconds', seconds)
+          countdownCol.innerText = formatTime(seconds)
+        }
+        patternRow.append(countdownCol)
+
+        const nameCol = document.createElement('td')
+        nameCol.style.width = '310px'
+        if (pattern[1] === data.current) nameCol.style.fontWeight = '1000'
+        if (pattern[2] === false) nameCol.classList.add('text-muted', 'text-decoration-line-through')
+        nameCol.innerText = pattern[0]
+        patternRow.append(nameCol)
+
+        const runButtonCol = document.createElement('td')
+        runButtonCol.style.width = '40px'
+        const runButton = document.createElement('button')
+        runButton.style.setProperty('--bs-btn-font-size', '0.75rem')
+        runButton.classList.add('btn', 'btn-sm', 'btn-outline-primary')
+        runButton.innerText = 'Zaženi'
+        runButton.onclick = async _ => {
+          await callApi({ 'začni': pattern[1] })
+        }
+        runButtonCol.append(runButton)
+        patternRow.append(runButtonCol)
+
+        const toggleButtonCol = document.createElement('td')
+        toggleButtonCol.style.width = '40px'
+        const toggleButton = document.createElement('button')
+        toggleButton.style.setProperty('--bs-btn-font-size', '0.75rem')
+        toggleButton.classList.add('btn', 'btn-sm', 'btn-outline-primary')
+        toggleButton.innerText = pattern[2] ? 'Onemogoči' : 'Omogoči'
+        toggleButton.onclick = async _ => {
+          if (pattern[2]) {
+            await callApi({ 'onemogoči': [pattern[1]] })
+          } else {
+            await callApi({ 'omogoči': [pattern[1]] })
+          }
+        }
+        toggleButtonCol.append(toggleButton)
+        patternRow.append(toggleButtonCol)
+
+        patterns.append(patternRow)
+      }
+    }
+  }
+
+  setupEventSource()
+
+  function formatTime (seconds) {
+    const MM = `${Math.floor(seconds / 60) % 60}`.padStart(2, '0')
+    const SS = `${Math.floor(seconds % 60)}`.padStart(2, '0')
+    return [MM, SS].join(':')
+  }
+
+  function handleCountdown () {
+    for (const elem of document.getElementsByClassName('countdown')) {
+      const seconds = parseInt(elem.getAttribute('seconds')) - 1
+      if (seconds < 0) continue
+      elem.setAttribute('seconds', seconds)
+      elem.innerHTML = formatTime(seconds)
+    }
+  }
+
+  setInterval(handleCountdown, 1000)
+
+  function updateTheme () {
+    document.documentElement.setAttribute('data-bs-theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+  }
+
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme)
+  updateTheme()
 </script>
