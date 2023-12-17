@@ -3,6 +3,8 @@ import random as r
 from library.patterns_lib import vivid, random_color
 from library.spheres import Sphere
 
+# NAME: Spiral
+
 jelka = Jelka(file="data/lucke3d.csv")
 
 

@@ -4,6 +4,8 @@ import random as r
 from library.patterns_lib import dist, normalize
 from library.spheres import Sphere
 
+# NAME: Sphere
+
 jelka = Jelka(file="data/lucke3d.csv")
 
 

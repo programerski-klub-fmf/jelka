@@ -3,6 +3,8 @@ import math
 from library.jelka import Color, Jelka
 from library.patterns_lib import random_color, vivid
 
+# NAME: Scan Z
+
 jelka = Jelka(file="data/lucke3d.csv")
 
 axis = 2

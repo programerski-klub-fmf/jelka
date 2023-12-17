@@ -4,6 +4,8 @@ import random as r
 from library.patterns_lib import dist, normalize, vivid, random_color
 from library.spheres import Sphere
 
+# NAME: Rain
+
 jelka = Jelka(file="data/lucke3d.csv")
 
 

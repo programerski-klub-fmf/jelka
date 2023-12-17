@@ -2,6 +2,8 @@ from library.jelka import Jelka, Color, Id, Position, Time
 import random as r
 from library.patterns_lib import vivid, random_color
 
+# NAME: Random
+
 jelka = Jelka(file="data/lucke3d.csv")
 
 
