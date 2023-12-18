@@ -62,6 +62,9 @@ def get_patterns():
 	return sorted(patterns)
 
 def json_status():
+	global current_pattern
+	global pattern_time
+	global disabled_patterns
 	return "data: " + http.json.dumps({"time": pattern_time, "patterns": get_patterns(), "disabled": list(disabled_patterns), "current": current_pattern}) + "\n\n"
 
 def http_event_stream():
