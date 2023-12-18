@@ -6,7 +6,7 @@ from library.spheres import Sphere
 
 # NAME: Rain
 
-jelka = Jelka(file="data/random_tree.csv")
+jelka = Jelka(file="data/lucke3d.csv")
 
 
 sph = []
