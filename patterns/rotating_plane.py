@@ -1,7 +1,9 @@
-from library.jelka import Jelka, Color, Id, TimeMs
 import math
-import random as r
-from library.patterns_lib import distance, normalize, vivid, random_color
+import random
+from colorsys import hsv_to_rgb, rgb_to_hsv
+
+from library.jelka import Jelka
+from library.patterns_lib import random_color, vivid
 
 # NAME: Rotating Plane
 
@@ -19,7 +21,9 @@ def update_colors(time: int, frame: int):
     global c1, c2
     if frame % 150 == 0:
         c1 = vivid(random_color())
-        c2 = vivid(random_color())
+        c1hsv = rgb_to_hsv(*[comp / 255.0 for comp in c1])
+        c2hsv = ((c1hsv[0] * 360 + random.randint(80, 280) % 360) / 360.0, c1hsv[1], c1hsv[2])
+        c2 = vivid(tuple(comp * 255 for comp in hsv_to_rgb(*c2hsv)))
 
     for i in range(len(colors)):
         pos = jelka.get_position_normalized(i)

@@ -2,6 +2,7 @@
 
 import base64
 import hashlib
+import json
 import os
 import pathlib
 import re
@@ -17,11 +18,18 @@ http = flask.Flask(__name__)
 secret = secrets.token_bytes(8)
 
 name_regex = re.compile(r"# *NAME: ((?:[-_+*.!? ]|\w)+)")
+config_filename = "config.json"
 
-pattern_time = int(os.getenv("PATTERN_TIME", 30))
-
-disabled_patterns = set(os.getenv("DISABLED_PATTERNS", "").split(",")) - {""}
-hidden_patterns = set(os.getenv("HIDDEN_PATTERNS", "").split(",")) - {""}
+try:
+	with open(config_filename, encoding="utf-8") as file:
+		config: dict = json.load(file)
+		pattern_time = int(config["pattern-time"])
+		disabled_patterns = set(config["patterns-disabled"])
+		hidden_patterns = set(config["patterns-hidden"])
+except (OSError, KeyError, ValueError):
+	pattern_time = 30
+	disabled_patterns = set()
+	hidden_patterns = set()
 
 forced_pattern: str | None = None
 current_pattern: str | None = None
@@ -44,6 +52,9 @@ def get_patterns():
 			if match := name_regex.search(line):
 				name = match.group(1)
 				break
+
+		if name == "DEBUG":
+			continue
 
 		# name, filename, enabled
 		patterns.add((name, pattern.name, pattern.name not in disabled_patterns))
@@ -95,6 +106,12 @@ def update(koda):
 	if "začni" in data.keys() and type(data["začni"]) == str:
 		forced_pattern = data["začni"]
 		začni_vzorec.set()
+	with open(config_filename, encoding="utf-8", mode="w") as file:
+		json.dump({
+			"pattern-time": pattern_time,
+			"patterns-disabled": list(disabled_patterns),
+			"patterns-hidden": list(hidden_patterns),
+		}, file)
 	return "true"
 
 @http.route("/<koda>", methods=["OPTIONS"])

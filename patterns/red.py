@@ -1,5 +1,7 @@
 from library.jelka import Color, Jelka
 
+# NAME: DEBUG
+
 jelka = Jelka(file="data/lucke3d.csv")
 
 
