@@ -64,16 +64,17 @@ class Jelka:
         return [(color[0], color[1], color[2]) for color in self._colors]
 
     def set_colors(self, colors: dict[Id, Color] | list[Color] | defaultdict[Id, Color]) -> None:
+        if_exists = lambda i, color: color if i in self.positions_cm else (0, 0, 0)
         if isinstance(colors, list):
             if len(colors) != self.count:
                 raise ValueError(f"Seznam barv mora imeti enako število lučk kot Jelka.count = {self.count}.")
-            self._colors = [to_color(color) for color in colors]
+            self._colors = [if_exists(i, to_color(color)) for i, color in enumerate(colors)]
             self.hardware.set_colors(self._colors)
         elif isinstance(colors, defaultdict):
-            self._colors = [to_color(colors[i]) for i in range(self.count)]
+            self._colors = [if_exists(i, to_color(colors[i])) for i in range(self.count)]
             self.hardware.set_colors(self._colors)
         elif isinstance(colors, dict):
-            self._colors = [to_color(colors[i]) if i in colors else (0, 0, 0) for i in range(self.count)]
+            self._colors = [if_exists(i, to_color(colors[i])) if i in colors else (0, 0, 0) for i in range(self.count)]
             self.hardware.set_colors(self._colors)
         else:
             raise ValueError(f"Unsuported type {type(colors)} for colors.")
