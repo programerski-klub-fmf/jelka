@@ -1,7 +1,7 @@
 from library.jelka import Jelka, Color, Id, TimeMs
 import math
 import random as r
-from library.patterns_lib import distance, normalize
+from library.patterns_lib import distance, normalize,vivid
 from library.spheres import Sphere
 
 # NAME: Sphere
@@ -28,11 +28,13 @@ def update_colors(time: int, frame: int):
             positions[i] = pos
             # positions.append([pos[0] - diff[0], pos[1] - diff[1], pos[2] - diff[2]])
 
-    positions = normalize(positions, sph.get_center())
+    positions = normalize(positions)
+    #print(positions)
     for i in range(0, len(colors)):
         colors[i] = [
             int(sphere_col[0] * positions[i][0] * intensity[i]),
             int(sphere_col[1] * positions[i][1] * intensity[i]),
             int(sphere_col[2] * positions[i][2] * intensity[i]),
         ]
+        colors[i] = vivid(colors[i])
     return colors
