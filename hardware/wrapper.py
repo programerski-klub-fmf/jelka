@@ -22,6 +22,8 @@ def izriši():
 	if os.getenv("SPANJE"):
 		time.sleep(float(os.getenv("SPANJE")))
 	if os.getenv("DRY_RUN"):
+		if os.getenv("QUIET"):
+			return
 		print("wrapper: ", end="")
 		for i in range(luči*3):
 			print(f"{buffer[i]:02x}", end="")
@@ -62,7 +64,8 @@ env["PWD"] = cwd
 env["USER"] = pw_record.pw_name
 env["PYTHONPATH"] = "/jelka"
 env["JELKA_PRODUKCIJA"] = "da"
-del env["KODA"]
+if "KODA" in env:
+	del env["KODA"]
 die = False
 try:
 	process = subprocess.Popen(
