@@ -28,10 +28,11 @@ class Jelka:
         # TODO : lastnosti smreke: višina, širina, število lučk, refresh rate, čas simulacije?
         self.count = 300
         self.refresh_rate = 20  # / s
+        self.is_simulation = hasattr(Hardware, "is_simulation") and Hardware.is_simulation
 
         self._colors: list[Color] = [(0, 0, 0) for _ in range(self.count)]
         if file is None:
-            if hasattr(Hardware, "is_simulation") and Hardware.is_simulation:
+            if self.is_simulation:
                 file = "data/random_tree.csv"
             else:
                 file = "data/lucke3d.csv"
@@ -68,14 +69,14 @@ class Jelka:
         if isinstance(colors, list):
             if len(colors) != self.count:
                 raise ValueError(f"Seznam barv mora imeti enako število lučk kot Jelka.count = {self.count}.")
-            self._colors = [if_exists(i, color) for i, color in enumerate(colors)]
+            self._colors = [color for i, color in enumerate(colors)]
         elif isinstance(colors, defaultdict):
-            self._colors = [if_exists(i, colors[i]) for i in range(self.count)]
+            self._colors = [colors[i] for i in range(self.count)]
         elif isinstance(colors, dict):
-            self._colors = [if_exists(i, colors[i]) if i in colors else (0, 0, 0) for i in range(self.count)]
+            self._colors = [colors[i] if i in colors else (0, 0, 0) for i in range(self.count)]
         else:
             raise ValueError(f"Unsuported type {type(colors)} for colors.")
-        self.hardware.set_colors([to_color(color) for color in self._colors])
+        self.hardware.set_colors([if_exists(i, to_color(color)) for i, color in enumerate(self._colors)])
 
     def get_color(self, id: Id) -> Color:
         if id >= len(self._colors) or id < 0:
