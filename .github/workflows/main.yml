@@ -41,6 +41,3 @@
         - name: Typecheck with mypy
           if: always()
           run: mypy library
-
-# TODO: Add deployment job
-# Something like: On commit to master, SSH to the server, pull latest changes

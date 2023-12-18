@@ -1,7 +1,7 @@
-from library.jelka import Jelka, Color, Id, TimeMs
 import math
-import random as r
-from library.patterns_lib import distance, normalize,vivid
+
+from library.jelka import Jelka
+from library.patterns_lib import distance, normalize, vivid
 from library.spheres import Sphere
 
 # NAME: Sphere
@@ -12,7 +12,7 @@ jelka = Jelka(file="data/lucke3d.csv")
 @jelka.run_shader_all
 def update_colors(time: int, frame: int):
     colors = jelka.colors
-    sph = Sphere([0.5, 0.5, 0.5], math.fabs(math.sin(frame / 50)) * 0.7 + 0.1)
+    sph = Sphere((0.5, 0.5, 0.5), math.fabs(math.sin(frame / 50)) * 0.7 + 0.1)
     sphere_col = (255, 255, 255)
 
     positions = {}
@@ -29,7 +29,7 @@ def update_colors(time: int, frame: int):
             # positions.append([pos[0] - diff[0], pos[1] - diff[1], pos[2] - diff[2]])
 
     positions = normalize(positions)
-    #print(positions)
+    # print(positions)
     for i in range(0, len(colors)):
         colors[i] = [
             int(sphere_col[0] * positions[i][0] * intensity[i]),
@@ -37,4 +37,5 @@ def update_colors(time: int, frame: int):
             int(sphere_col[2] * positions[i][2] * intensity[i]),
         ]
         colors[i] = vivid(colors[i])
+
     return colors

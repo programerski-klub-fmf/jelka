@@ -4,7 +4,6 @@ from library.jelka import Color, Jelka
 
 jelka = Jelka(file="data/lucke3d.csv")
 
-
 very_sus = {
     148,
     152,

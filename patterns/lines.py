@@ -1,6 +1,4 @@
-import random as r
-from library.jelka import Jelka, Color, TimeMs
-from typing import Any, Callable, cast
+from library.jelka import Jelka
 from library.patterns_lib import random_color, vivid
 
 # NAME: Lines
@@ -25,6 +23,8 @@ def update_colors(time: int, frame: int):
     else:
         colors[0] = (0, 0, 0)
         col = vivid(random_color())
+
     for i in reversed(range(1, len(colors))):
         colors[i] = colors[i - 1]
+
     return colors

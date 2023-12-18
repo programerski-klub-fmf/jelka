@@ -1,5 +1,6 @@
-from library.jelka import Jelka, Color, Id, TimeMs
 import math
+
+from library.jelka import Color, Jelka
 from library.patterns_lib import vivid
 
 # NAME: Gradient

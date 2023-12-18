@@ -1,7 +1,7 @@
-from library.jelka import Jelka, Color, Id, TimeMs
 import math
-import random as r
-from library.patterns_lib import distance, normalize, vivid, random_color
+
+from library.jelka import Jelka
+from library.patterns_lib import distance, random_color, vivid
 
 # NAME: Pulse
 
@@ -24,7 +24,7 @@ def update_colors(time: int, frame: int):
     for i in range(0, len(colors)):
         pos = jelka.get_position_normalized(i)
         diff = [sphere_center[0] - pos[0], sphere_center[1] - pos[1], sphere_center[2] - pos[2]]
-        if distance(diff) <= rad1 and distance(diff) >= rad2:
+        if rad1 >= distance(diff) >= rad2:
             j = distance(diff) / rad1
             if colors[i] == (0, 0, 0):
                 colors[i] = (j * col[0], j * col[1], j * col[2])

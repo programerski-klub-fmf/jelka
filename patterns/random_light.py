@@ -1,6 +1,5 @@
-from library.jelka import Jelka, Color, Id, TimeMs
-import random as r
-from library.patterns_lib import vivid, random_color
+from library.jelka import Jelka
+from library.patterns_lib import random_color, vivid
 
 # NAME: Random
 

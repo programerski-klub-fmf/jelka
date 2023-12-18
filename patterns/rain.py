@@ -1,13 +1,11 @@
-from library.jelka import Jelka, Color, Id, TimeMs
-import math
 import random as r
-from library.patterns_lib import distance, normalize, vivid, random_color
+
+from library.jelka import Jelka
 from library.spheres import Sphere
 
 # NAME: Rain
 
 jelka = Jelka(file="data/lucke3d.csv")
-
 
 sph = []
 
@@ -33,4 +31,5 @@ def update_colors(time: int, frame: int):
         for j in range(len(sph)):
             if sph[j].isIn(pos):
                 colors[i] = (0, 0, 255)
+
     return colors

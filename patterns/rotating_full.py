@@ -28,7 +28,7 @@ def update_colors(time: int, frame: int):
     for i in range(len(colors)):
         pos = jelka.get_position_normalized(i)
         dcrtica = pos[0] * normal[0] + pos[1] * normal[1] + pos[2] * normal[2]
-        if dcrtica >= d - threshold and dcrtica <= d:
+        if d - threshold <= dcrtica <= d:
             colors[i] = c1
         else:
             colors[i] = c2

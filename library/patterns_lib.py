@@ -5,18 +5,22 @@ from random import randint
 
 
 def clamp(c: Color) -> Color:
-    return (min(255, max(c[0], 0)), min(255, max(c[1], 0)), min(255, max(c[1], 0)))
+    """Clamps color into valid range (0-255)."""
+    return min(255, max(c[0], 0)), min(255, max(c[1], 0)), min(255, max(c[1], 0))
 
 
 def distance(p: Iterable[float]) -> float:
+    """Calculates absolute value of a point."""
     return math.sqrt(sum(x**2 for x in p))
 
 
 def get_max(positions: Iterable[Position]) -> tuple[float, ...]:
+    """Gets the maximum position in iterable."""
     return tuple(max(pos[axis] for pos in positions) for axis in range(3))
 
 
 def get_min(positions: Iterable[Position]) -> tuple[float, ...]:
+    """Gets the minimum position in iterable."""
     return tuple(min(pos[axis] for pos in positions) for axis in range(3))
 
 
@@ -37,6 +41,7 @@ def normalize(
 
 
 def vivid(c: Color) -> Color:
+    """Makes color more vivid."""
     m = min(c[0], c[1], c[2])
     if c[0] == m:
         return (0, c[1], c[2])
@@ -46,4 +51,5 @@ def vivid(c: Color) -> Color:
 
 
 def random_color() -> Color:
-    return (randint(0, 255), randint(0, 255), randint(0, 255))
+    """Generates a random color."""
+    return randint(0, 255), randint(0, 255), randint(0, 255)

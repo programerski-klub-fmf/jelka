@@ -1,6 +1,6 @@
 import math
 
-from library.jelka import Color, Jelka
+from library.jelka import Jelka
 from library.patterns_lib import random_color, vivid
 
 # NAME: Scan Z
