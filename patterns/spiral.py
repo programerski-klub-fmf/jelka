@@ -2,7 +2,7 @@ from library.jelka import Jelka, Color, Id, TimeMs
 import random as r
 from library.patterns_lib import vivid, random_color
 from library.spheres import Sphere
-import math 
+import math
 
 # NAME: Spiral
 
@@ -14,14 +14,14 @@ def update_colors(time: int, frame: int):
     global col
 
     height = 1 - 0.005 *(frame%220)
-    if height == 1: 
+    if height == 1:
         col = vivid(random_color())
     rad = 1/2 - height/2
     x = 0.5 + rad*math.cos(height*20)
     y = 0.5 + rad*math.sin(height*20)
 
     sph = Sphere((x,y,height),0.1)
-    
+
     for i in range(len(colors)):
         pos = jelka.get_position_normalized(i)
         if sph.isIn(pos) :

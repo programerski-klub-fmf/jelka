@@ -128,7 +128,7 @@ class Jelka:
 
     def new_screen_mapping(
         self,
-        size: tuple[int, int] = (160, 160),
+        size: tuple[int, int] = (50, 50),
         rotation: tuple[float, float, float] = (0, 0, 0),
         translation: tuple[float, float, float] = (0, 0, 0),
         positive_only: bool = False,
