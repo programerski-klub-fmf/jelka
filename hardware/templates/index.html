@@ -94,7 +94,6 @@
       const enabledPatterns = data.patterns.filter(pattern => pattern[2])
 
       const currentIndex = enabledPatterns.findIndex(pattern => pattern[1] === data.current)
-      console.log(currentIndex)
 
       for (const pattern of data.patterns) {
         const patternRow = document.createElement('tr')
@@ -114,9 +113,9 @@
 
           let seconds = 0
           if (myIndex > currentIndex) {
-            seconds = (myIndex - currentIndex) * data.time
+            seconds = (myIndex - currentIndex - 1) * data.time + Math.round(data.remaining)
           } else {
-            seconds = (enabledPatterns.length - currentIndex + myIndex) * data.time
+            seconds = (enabledPatterns.length - currentIndex + myIndex - 1) * data.time + Math.round(data.remaining)
           }
 
           countdownCol.setAttribute('seconds', seconds)

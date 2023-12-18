@@ -34,6 +34,7 @@ except (OSError, KeyError, ValueError):
 forced_pattern: str | None = None
 current_pattern: str | None = None
 current_process: subprocess.Popen | None = None
+starting_time: float | None = None
 
 
 def get_patterns():
@@ -62,10 +63,7 @@ def get_patterns():
 	return sorted(patterns)
 
 def json_status():
-	global current_pattern
-	global pattern_time
-	global disabled_patterns
-	return "data: " + http.json.dumps({"time": pattern_time, "patterns": get_patterns(), "disabled": list(disabled_patterns), "current": current_pattern}) + "\n\n"
+	return "data: " + http.json.dumps({"time": pattern_time, "patterns": get_patterns(), "disabled": list(disabled_patterns), "current": current_pattern, "remaining": pattern_time + starting_time - time.time()}) + "\n\n"
 
 def http_event_stream():
 	yield json_status()
@@ -92,7 +90,9 @@ def stream():
 def update(koda):
 	global disabled_patterns
 	global pattern_time
+	global current_pattern
 	global forced_pattern
+	global starting_time
 	if not koda or koda not in kode():
 		return flask.Response(http.json.dumps({"napaka": {"koda": 1, "besedilo": "Napačno geslo!"}}), status=200)
 	data = flask.json.loads(flask.request.data)
@@ -105,10 +105,11 @@ def update(koda):
 		if data["čas"] < 1 or data["čas"] > 600:
 			return flask.Response(http.json.dumps({"napaka": {"koda": 2, "besedilo": "Čas mora biti med 1 in 600 sekund!"}}), status=200)
 		pattern_time = data["čas"]
-	sprememba_stanja.set()
 	if "začni" in data.keys() and type(data["začni"]) == str:
-		forced_pattern = data["začni"]
+		current_pattern = forced_pattern = data["začni"]
+		starting_time = time.time()
 		začni_vzorec.set()
+	sprememba_stanja.set()
 	with open(config_filename, encoding="utf-8", mode="w") as file:
 		json.dump({
 			"pattern-time": pattern_time,
@@ -141,6 +142,7 @@ def subprocess_manager():
 	global forced_pattern
 	global current_pattern
 	global current_process
+	global starting_time
 	global začni_vzorec
 
 	while True:
@@ -164,6 +166,8 @@ def subprocess_manager():
 
 		print(f"daemon: starting pattern {current_pattern}")
 		current_process = subprocess.Popen(["./wrapper.py", current_pattern])
+
+		starting_time = time.time()
 
 		sprememba_stanja.set()
 		začni_vzorec.clear()
@@ -195,9 +199,8 @@ def display_manager():
 
 		if new_pattern_name != current_pattern_name:
 			current_pattern_name = new_pattern_name
-			current_pattern_start = time.time()
 
-		remaining_time = int(round(pattern_time + current_pattern_start - time.time(), 0))
+		remaining_time = int(round(pattern_time + starting_time - time.time(), 0))
 		remaining_minutes = remaining_time // 60
 		remaining_seconds = remaining_time % 60
 		remaining_display = f"{remaining_minutes:02d}:{remaining_seconds:02d}"
