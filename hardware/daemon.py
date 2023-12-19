@@ -169,6 +169,7 @@ def subprocess_manager():
 
 		starting_time = time.time()
 
+		sprememba_stanja.clear()
 		sprememba_stanja.set()
 		začni_vzorec.clear()
 
