@@ -63,12 +63,15 @@ def get_patterns():
 	return sorted(patterns)
 
 def json_status():
-	return "data: " + http.json.dumps({"time": pattern_time, "patterns": get_patterns(), "disabled": list(disabled_patterns), "current": current_pattern, "remaining": pattern_time + starting_time - time.time()}) + "\n\n"
+	return http.json.dumps({"time": pattern_time, "patterns": get_patterns(), "disabled": sorted(disabled_patterns), "current": current_pattern, "remaining": pattern_time + starting_time - time.time()})
 
 def http_event_stream():
 	yield json_status()
-	while sprememba_stanja.wait():
-		yield json_status()
+	while True:
+		sprememba_stanja.wait(timeout=1)
+		data = json_status()
+		yield "data: " + data + "\n\n"
+		print("daemon: sent data: " + data)
 		print("daemon: current password: " + kode()[0])
 		sprememba_stanja.clear()
 
@@ -113,8 +116,8 @@ def update(koda):
 	with open(config_filename, encoding="utf-8", mode="w") as file:
 		json.dump({
 			"pattern-time": pattern_time,
-			"patterns-disabled": list(disabled_patterns),
-			"patterns-hidden": list(hidden_patterns),
+			"patterns-disabled": sorted(disabled_patterns),
+			"patterns-hidden": sorted(hidden_patterns),
 		}, file)
 	return "true"
 
@@ -151,10 +154,10 @@ def subprocess_manager():
 
 		patterns = [pattern[1] for pattern in get_patterns() if pattern[2]]
 		print(f"daemon: enabled patterns: {list(patterns)}")
-		print(f"daemon: disabled patterns: {list(disabled_patterns)}")
+		print(f"daemon: disabled patterns: {sorted(disabled_patterns)}")
 
 		if not patterns:
-			sprememba_stanja.wait(timeout=5)
+			sprememba_stanja.wait(timeout=1)
 			continue
 
 		try: current_pattern = patterns[(patterns.index(current_pattern) + 1) % len(patterns)]
@@ -189,13 +192,12 @@ def display_manager():
 	# - Anything else?
 
 	current_pattern_name: str | None = None
-	current_pattern_start: float | None = None
 
 	while True:
 		try:
 			new_pattern_name = next(pattern[0] for pattern in get_patterns() if pattern[1] == current_pattern)
 		except StopIteration:
-			začni_vzorec.wait(timeout=5)
+			začni_vzorec.wait(timeout=1)
 			continue
 
 		if new_pattern_name != current_pattern_name:
