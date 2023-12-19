@@ -6,6 +6,8 @@ jelka = Jelka(file="data/lucke3d.csv")
 
 w = 100
 
+jelka.debug_lines[0] = ([(0, 0, 500), (0, 0, 0)], (255, 0, 0))
+jelka.debug_points[0] = ((0, 0, 500), (255, 0, 0))
 
 @jelka.run_shader
 def color_change(id: int, time: int, frame: int) -> Color:

@@ -3,14 +3,14 @@ import math
 
 print("Reading data...")
 data = []
-with open("data/points2.csv") as f:
+with open("data/points3.csv") as f:
     for line in f.readlines():
         lucka, x, z, pogled = map(int, line.split(","))
         data.append((lucka, x, z, pogled))
 
 # x = 0 je na levem robu slike
-center_x = [880] * 4  # zares je sredina smreke na 920, ampak tkole so boljši rezultati
-angles = [0, 90, 0, -90]
+center_x = [880] * 8  # zares je sredina smreke na 920, ampak tkole so boljši rezultati
+angles = [-n * 45 for n in range(8)]
 # center_x = [0] * 4
 # koordinatni sistem je obrnjen,
 lowest_z = max(data, key=lambda x: x[2])[2]
