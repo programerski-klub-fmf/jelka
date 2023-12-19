@@ -25,4 +25,12 @@ View the website at [jelka.4a.si](https://jelka.4a.si/).
 
 ## Running Patterns On Raspberry Pi
 
-Good luck...
+* Connect GPIO 18 to a logic level shifter to 5V. Connect the output of the logic shifter via a 33 Ohm serial resistor to the data line of the strand.
+* Connect to eduroam (optional): `nmcli --ask connection add type wifi con-name "edu" ifname wlan0 ssid "eduroam" -- wifi-sec.key-mgmt wpa-eap 802-1x.eap ttls 802-1x.phase2-auth mschapv2 802-1x.identity "as82306@student.uni-lj.si" 802-1x.password "selectdelete"` (good luck!)
+* Clone this repository
+* `cd hardware`
+* `./chroot.sh start chroot`
+* `useradd --system umetnik` (only once)
+* `LEDS=600 KODA=geslo PORT=80 ./daemon.py`
+
+To start the software at boot, you can use cron: `@reboot sleep 10; cd /root/jelka/hardware; ./chroot.sh start chroot; LEDS=600 KODA=abcd PORT=80 screen -dmS jelka ./daemon.py`
