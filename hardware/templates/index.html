@@ -127,7 +127,12 @@
         nameCol.style.width = '310px'
         if (pattern[1] === data.current) nameCol.style.fontWeight = '1000'
         if (pattern[2] === false) nameCol.classList.add('text-muted', 'text-decoration-line-through')
-        nameCol.innerText = pattern[0]
+        const nameLink = document.createElement('a')
+        nameLink.setAttribute('target', '_blank')
+        nameLink.setAttribute('href', `https://github.com/programerski-klub-fmf/jelka/blob/master/patterns/${pattern[1]}`)
+        nameLink.classList.add('text-decoration-none', 'text-reset')
+        nameLink.innerText = pattern[0]
+        nameCol.append(nameLink)
         patternRow.append(nameCol)
 
         const runButtonCol = document.createElement('td')
