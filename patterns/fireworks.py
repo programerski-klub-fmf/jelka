@@ -18,12 +18,13 @@ spawn_offset = lifetime // firework_count # frames between two spawns of firewor
 fireworks = [(0, 0)] * firework_count
 firework_colors = [(0, 0, 0)] * firework_count
 
+jelka = Jelka(file="data/lucke3d.csv")
+
+# scale up all values so that at least one of the components is 255
 def brighten_color(color):
     x = 255 / max(color)
     color = tuple(map(lambda x, s : int(x * s), color, (x, x, x)))
     return color
-
-jelka = Jelka(file="data/lucke3d.csv")
 
 @jelka.run_shader_all
 def update_colors(time: int, frame: int):
@@ -50,6 +51,7 @@ def update_colors(time: int, frame: int):
     
     # spheres expand with time
     spheres = [Sphere(firework_pos(fireworks[i]), firework_rad_func(looped_frames[i] / lifetime)) for i in range(firework_count)]
+    # smaller sphere for a disappearing center
     spheres_small = [Sphere(firework_pos(fireworks[i]), firework_small_rad_func(looped_frames[i] / lifetime)) for i in range(firework_count)]
 
     for i in range(len(colors)):
@@ -67,12 +69,6 @@ def update_colors(time: int, frame: int):
             color_sum = (int(color_sum[0] / sumed_count), 
                          int(color_sum[1] / sumed_count), 
                          int(color_sum[2] / sumed_count))
-        else:
-            color_sum = (0, 0, 100)
         colors[i] = color_sum
-        #if sph.isIn(pos):
-        #    colors[i] = col
-        #else:
-        #    colors[i] = (0, 0, 0)
 
     return colors
