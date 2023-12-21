@@ -20,7 +20,7 @@ strip = PixelStrip(luči, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTN
 strip.begin()
 
 def nastavi(luč, barva):
-	strip.setPixelColor(luč, Color(barva[0], barva[1], barva[2]))
+	strip.setPixelColor(luč, Color(barva[1], barva[0], barva[2]))
 
 def izriši():
 	strip.show()
