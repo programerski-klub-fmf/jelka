@@ -1,6 +1,8 @@
 # Jelka FMF
 
-View the website at [jelka.4a.si](https://jelka.4a.si/).
+Programmable Christmas tree at the Faculty of Mathematics and Physics, University of Ljubljana.
+
+Visit the [Jelka FMF](https://github.com/Jelka-FMF) organization and [jelka.fmf.uni-lj.si](https://jelka.fmf.uni-lj.si/) for the new version.
 
 ## Directory Structure
 
