@@ -67,12 +67,12 @@ class Smreka:
         # pravokotno na ravnino kamere (y = y_camera)
         point1 = np.array([[x], [-self.camera[1, 0]], [z]]) + self.camera
         point2 = point1 + np.array([[0], [self.height], [0]])
-        point1 = self.inverse_rotation @ point1
-        point2 = self.inverse_rotation @ point2
+        pointa = self.inverse_rotation @ self.camera
+        pointb = self.inverse_rotation @ point2
 
         if lucka not in self.lines:
             self.lines[lucka] = []
-        self.lines[lucka].append((point1, point2))
+        self.lines[lucka].append((pointa, pointb))
 
     def calculate(self):
         # Sanja se mi ne zakaj, ampak če uporabljam bounds gre vse v (0, 0, 0)
