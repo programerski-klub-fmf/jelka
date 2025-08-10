@@ -88,3 +88,45 @@ class Smreka:
 
     def calculate_lucke(self):
         self.lucke = dict(self.calculate())
+
+
+class Cam:
+    def __init__(self, d, angle, f, lucke: dict[int, tuple[float, float]]):
+        ''' d = distance camera - center of rotation
+        f = focal length in pixel/cm
+        '''
+        self.d = d
+        self.f = f
+        self.angle = angle % (2 * np.pi)
+        self.lucke = {lucka: np.array([[x], [z]]) for lucka, (x, z) in lucke.items()}
+        self.inverse_rotation = np.array(
+            [
+                [np.cos(-self.angle), -np.sin(-self.angle), 0],
+                [np.sin(-self.angle), np.cos(-self.angle), 0],
+                [0, 0, 1],
+            ]
+        )
+    
+    def pos_to_uv(self, r: np.array):
+        xyz = self.inverse_rotation @ np.array([[r[0]], [r[1]], [r[2]]]) + np.array([[0], [self.d], [0]])
+        return self.f / xyz[1] * np.array([
+            [1, 0, 0],
+            [0, 0, 1],
+        ]) @ xyz
+
+    def uv_to_err2(self, uv: np.array, led: int):
+        err = uv - self.lucke[led]
+        err2 = np.sum(err ** 2)
+        return err2
+
+def total_error(pos: np.array, cams: list[Cam], led: int):
+    te = sum(cam.uv_to_err2(cam.pos_to_uv(pos), led) for cam in cams)
+    # print("total_error", te)
+    return te
+
+def calculate(cams: list[Cam], led: int):
+    return scipy.optimize.minimize(
+        total_error,
+        np.array([0, 0, 0]),
+        args=(cams, led),
+    )

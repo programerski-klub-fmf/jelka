@@ -2,6 +2,8 @@ import math
 from random import uniform, randint
 from threading import Thread, Lock
 
+def clamp_color(color: tuple[int, int, int], min_val: int = 0, max_val: int = 255) -> tuple[int, int, int]:
+    return tuple(max(min(c, max_val), min_val) for c in color)
 
 class Matrix(list):
     def __mul__(self, other):
@@ -66,8 +68,16 @@ class Simulation:
         else:
             self.smreka = smreka.copy()
         self.points = {i: Matrix([[p[0]], [p[1]], [p[2]]]) for i, p in self.smreka.items()}
-        self.colors = {i: (randint(0, 255), randint(0, 255), randint(0, 255)) for i in self.smreka}
-
+        self.colors = {}
+        errors = []
+        with open("data/test.csv", "r") as f:
+            for line in f:
+                lucka, x, y, z = line.split(",")
+                lucka = int(lucka)
+                x, y, z = map(float, (x, y, z))
+                errors.append((x - self.smreka[lucka][0], y - self.smreka[lucka][1], z - self.smreka[lucka][2]))
+                self.colors[lucka] = clamp_color((abs(self.smreka[lucka][0] - x), abs(self.smreka[lucka][1] - y), abs(self.smreka[lucka][2] - z)))
+        print("Errors:", list(map(lambda x: (x[0]**2 + x[1]**2 + x[2]**2)**0.5, errors)))
         self.scale = 1
         self.camera = (0, -500, 100)
 
@@ -176,24 +186,25 @@ class Hardware:
 
 
 if __name__ == "__main__":
-    rt = list(random_tree())
-    with open("data/random_tree.csv", "w+") as f:
-        for i, (x, y, z) in enumerate(rt):
-            f.write(f"{i},{x},{y},{z}\n")
-    rt = {
-        int(line.split(",")[0]): tuple(map(float, (line.split(",")[1:])))
-        for line in open("data/lucke3d.csv").read().split("\n")
-        if line != ""
-    }
-    scale = 0.2372479240806643
-    lz = 1068
-    cx = 880
-    with open("data/3d_to_2d.csv", "w+") as f:
-        for i, (x, y, z) in ((i, rt[i]) for i in rt):
-            for pogled in range(4):
-                rot = Matrix.rotation(pogled * math.pi / 2, 0)
-                v = rot * Matrix([[x], [y], [z]])
-                xp = v[0][0]  # / scale + cx
-                zp = lz - v[2][0] / scale
-                f.write(f"{i},{int(xp)},{int(zp)},{pogled}\n")
-    h = Hardware(file=None)
+    # rt = list(random_tree())
+    # with open("data/random_tree.csv", "w+") as f:
+    #     for i, (x, y, z) in enumerate(rt):
+    #         f.write(f"{i},{x},{y},{z}\n")
+    # rt = {
+    #     int(line.split(",")[0]): tuple(map(float, (line.split(",")[1:])))
+    #     for line in open("data/lucke3d.csv").read().split("\n")
+    #     if line != ""
+    # }
+    # scale = 0.2372479240806643
+    # lz = 1068
+    # cx = 880
+    # with open("data/3d_to_2d.csv", "w+") as f:
+    #     for i, (x, y, z) in ((i, rt[i]) for i in rt):
+    #         for pogled in range(4):
+    #             rot = Matrix.rotation(pogled * math.pi / 2, 0)
+    #             v = rot * Matrix([[x], [y], [z]])
+    #             xp = v[0][0]  # / scale + cx
+    #             zp = lz - v[2][0] / scale
+    #             f.write(f"{i},{int(xp)},{int(zp)},{pogled}\n")
+    h = Hardware(file="data/positions_test2.csv")
+
